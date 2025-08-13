@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "id": "12",
+  "repository_name": "chronofeature",
+  "title": "Chronofeature",
+  "package": "chronofeature",
+  "language": "python",
+  "field": "ML platform and feature engineering",
+  "focus": "Point-in-time features, window aggregates, TTL and offline/online parity",
+  "ai_connection": "Preventing label leakage and serving the same features used in training",
+  "smoke_commands": [
+    {
+      "name": "demo",
+      "args": []
+    },
+    {
+      "name": "evaluate",
+      "args": []
+    }
+  ],
+  "layout": {
+    "docs_root": "reference",
+    "tests_root": "test",
+    "tools_root": "scripts",
+    "config_root": "feature_specs",
+    "examples_root": "worked_examples",
+    "verifier": "scripts/check_features.py",
+    "source_roots": [
+      "src"
+    ],
+    "documents": {
+      "architecture": "reference/feature-flow.md",
+      "design": "reference/point-in-time-rules.md",
+      "review": "reference/temporal-regressions.md",
+      "experiments": "reference/parity-runs.md",
+      "publishing": "reference/sharing-feature-specs.md",
+      "validation": "reference/check-results.md"
+    }
+  }
+}
