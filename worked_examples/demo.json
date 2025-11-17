@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "experiment": "synthetic_point_in_time_features_vs_independent_scan",
+  "seed": 17,
+  "input_sha256": "23b98b89c8db84158fb043a7d28dbf3b763481bc388e4221ba4fa9227696f6ff",
+  "base_events": 100,
+  "source_revisions": 112,
+  "oracle_comparisons": 120,
+  "checks": 138,
+  "passed": 138,
+  "example_training_row": {
+    "label_id": "label-0",
+    "target": 0,
+    "features": {
+      "entity": "entity-0",
+      "feature_time": 100,
+      "observation_cutoff": 100,
+      "source_generation": 7,
+      "spec_name": "transactions",
+      "spec_sha256": "e4a54fdccec19e64e8fa4026873e946c1947c8dbd76b72d90232ae0f02a3d64c",
+      "spec_version": 1,
+      "windows": {
+        "10": {
+          "count": 0,
+          "last": null,
+          "last_event_time": null,
+          "mean": null,
+          "status": "missing",
+          "sum": 0,
+          "valid_before": 121
+        },
+        "30": {
+          "count": null,
+          "last": null,
+          "last_event_time": 78,
+          "mean": null,
+          "status": "stale",
+          "sum": null,
+          "valid_before": 99
+        }
+      }
+    }
+  },
+  "example_expired_serving": {
+    "version_id": "crashed",
+    "served_at": 200,
+    "features": {
+      "entity": "entity-0",
+      "feature_time": 105,
+      "observation_cutoff": 105,
+      "source_generation": 9,
+      "spec_name": "transactions",
+      "spec_sha256": "e4a54fdccec19e64e8fa4026873e946c1947c8dbd76b72d90232ae0f02a3d64c",
+      "spec_version": 1,
+      "windows": {
+        "10": {
+          "count": null,
+          "last": null,
+          "last_event_time": null,
+          "mean": null,
+          "status": "expired",
+          "sum": null,
+          "valid_before": 126
+        },
+        "30": {
+          "count": null,
+          "last": null,
+          "last_event_time": 94,
+          "mean": null,
+          "status": "expired",
+          "sum": null,
+          "valid_before": 108
+        }
+      }
+    },
+    "status": "available"
+  },
+  "limitations": [
+    "Availability timestamps are declared source provenance, not externally attested clocks.",
+    "Local SQLite snapshots and integer-valued signals; no distributed online store or throughput claim.",
+    "Online values retain their materialization feature time; they are not recomputed at serving time."
+  ]
+}
