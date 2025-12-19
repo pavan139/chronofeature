@@ -1,0 +1,637 @@
+{
+  "schema_version": 1,
+  "experiment": "synthetic_point_in_time_features_vs_independent_scan",
+  "seed": 17,
+  "input_sha256": "23b98b89c8db84158fb043a7d28dbf3b763481bc388e4221ba4fa9227696f6ff",
+  "base_events": 100,
+  "source_revisions": 112,
+  "oracle_comparisons": 120,
+  "checks": 138,
+  "passed": 138,
+  "cases": [
+    {
+      "id": "duplicate-ingest-stable-generation",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e0-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e0-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e0-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e0-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e0-t140",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e1-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e1-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e1-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e1-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e1-t140",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e2-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e2-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e2-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e2-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e2-t140",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e3-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e3-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e3-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e3-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e3-t140",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e4-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e4-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e4-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e4-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e4-t140",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e5-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e5-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e5-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e5-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e5-t140",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e6-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e6-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e6-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e6-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e6-t140",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e7-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e7-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e7-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e7-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g1-e7-t140",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e0-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e0-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e0-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e0-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e0-t140",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e1-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e1-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e1-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e1-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e1-t140",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e2-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e2-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e2-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e2-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e2-t140",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e3-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e3-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e3-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e3-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e3-t140",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e4-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e4-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e4-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e4-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e4-t140",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e5-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e5-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e5-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e5-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e5-t140",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e6-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e6-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e6-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e6-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e6-t140",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e7-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e7-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e7-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e7-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g3-e7-t140",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e0-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e0-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e0-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e0-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e0-t140",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e1-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e1-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e1-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e1-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e1-t140",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e2-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e2-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e2-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e2-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e2-t140",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e3-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e3-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e3-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e3-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e3-t140",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e4-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e4-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e4-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e4-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e4-t140",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e5-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e5-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e5-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e5-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e5-t140",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e6-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e6-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e6-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e6-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e6-t140",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e7-t10",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e7-t30",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e7-t60",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e7-t100",
+      "passed": true
+    },
+    {
+      "id": "oracle-g7-e7-t140",
+      "passed": true
+    },
+    {
+      "id": "target-never-enters-features",
+      "passed": true
+    },
+    {
+      "id": "online-offline-entity-0",
+      "passed": true
+    },
+    {
+      "id": "online-offline-entity-1",
+      "passed": true
+    },
+    {
+      "id": "online-offline-entity-2",
+      "passed": true
+    },
+    {
+      "id": "online-offline-entity-3",
+      "passed": true
+    },
+    {
+      "id": "online-offline-entity-4",
+      "passed": true
+    },
+    {
+      "id": "online-offline-entity-5",
+      "passed": true
+    },
+    {
+      "id": "online-offline-entity-6",
+      "passed": true
+    },
+    {
+      "id": "online-offline-entity-7",
+      "passed": true
+    },
+    {
+      "id": "late-observation-not-label-leak",
+      "passed": true
+    },
+    {
+      "id": "old-online-version-immutable",
+      "passed": true
+    },
+    {
+      "id": "backfill-new-version-parity",
+      "passed": true
+    },
+    {
+      "id": "atomic-materialization-pointer",
+      "passed": true
+    },
+    {
+      "id": "restart-materialization",
+      "passed": true
+    },
+    {
+      "id": "replay-does-not-roll-pointer-back",
+      "passed": true
+    },
+    {
+      "id": "expired-values-withheld",
+      "passed": true
+    },
+    {
+      "id": "future-observation-cutoff-denied",
+      "passed": true
+    }
+  ],
+  "example_training_row": {
+    "label_id": "label-0",
+    "target": 0,
+    "features": {
+      "entity": "entity-0",
+      "feature_time": 100,
+      "observation_cutoff": 100,
+      "source_generation": 7,
+      "spec_name": "transactions",
+      "spec_sha256": "e4a54fdccec19e64e8fa4026873e946c1947c8dbd76b72d90232ae0f02a3d64c",
+      "spec_version": 1,
+      "windows": {
+        "10": {
+          "count": 0,
+          "last": null,
+          "last_event_time": null,
+          "mean": null,
+          "status": "missing",
+          "sum": 0,
+          "valid_before": 121
+        },
+        "30": {
+          "count": null,
+          "last": null,
+          "last_event_time": 78,
+          "mean": null,
+          "status": "stale",
+          "sum": null,
+          "valid_before": 99
+        }
+      }
+    }
+  },
+  "example_expired_serving": {
+    "version_id": "crashed",
+    "served_at": 200,
+    "features": {
+      "entity": "entity-0",
+      "feature_time": 105,
+      "observation_cutoff": 105,
+      "source_generation": 9,
+      "spec_name": "transactions",
+      "spec_sha256": "e4a54fdccec19e64e8fa4026873e946c1947c8dbd76b72d90232ae0f02a3d64c",
+      "spec_version": 1,
+      "windows": {
+        "10": {
+          "count": null,
+          "last": null,
+          "last_event_time": null,
+          "mean": null,
+          "status": "expired",
+          "sum": null,
+          "valid_before": 126
+        },
+        "30": {
+          "count": null,
+          "last": null,
+          "last_event_time": 94,
+          "mean": null,
+          "status": "expired",
+          "sum": null,
+          "valid_before": 108
+        }
+      }
+    },
+    "status": "available"
+  },
+  "limitations": [
+    "Availability timestamps are declared source provenance, not externally attested clocks.",
+    "Local SQLite snapshots and integer-valued signals; no distributed online store or throughput claim.",
+    "Online values retain their materialization feature time; they are not recomputed at serving time."
+  ]
+}
