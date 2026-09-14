@@ -116,7 +116,7 @@
     <div class="report-top"><div><div class="eyebrow">ASTRO / {{ t.result }}</div><h2 id="result-heading">{{ t.result }}</h2></div><div class="report-actions"><button id="edit" class="secondary">{{ t.edit }}</button><button id="download-pdf" type="button" class="primary">{{ t.downloadPdf }}</button></div></div>
     <div class="report-tools" role="group" aria-label="{{ t.result }}">
       <button id="toggle-details" type="button" class="secondary" aria-expanded="false" aria-controls="report-content">{{ t.expandAll }}</button>
-      <button type="button" class="secondary" data-help="ashtakoota">{{ t.help }} <span aria-hidden="true">?</span></button>
+      <button type="button" class="secondary" data-help="{{ 'graha' if view=='chart' else 'ashtakoota' }}">{{ t.help }} <span aria-hidden="true">?</span></button>
       <details class="export-menu"><summary class="secondary">{{ t.more }}</summary><div class="export-options"><button id="share-result" type="button" class="secondary">{{ t.share }}</button><button id="print" type="button" class="secondary">{{ t.print }}</button><button id="download-json" type="button" class="secondary">{{ t.downloadJson }}</button></div></details>
     </div>
     <p id="export-error" class="form-error" role="alert" hidden></p>

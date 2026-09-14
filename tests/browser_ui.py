@@ -14,16 +14,16 @@ with sync_playwright() as playwright:
     page.on("pageerror", lambda error: errors.append(str(error)))
     page.on("request", lambda request: calculations.append(request.url) if request.method == "POST" and "/match/full" in request.url else None)
     page.goto("http://127.0.0.1:8000/en/")
-    page.screenshot(path=str(ARTIFACTS / "desktop.png"), full_page=True)
+    page.screenshot(animations="disabled", path=str(ARTIFACTS / "desktop.png"), full_page=True)
     page.locator("#theme-toggle").click()
     # Contextual help is keyboard reachable, local and preserves the input.
     help_button = page.locator('[data-person="groom"] [data-help="birth-time"]')
     help_button.click()
     assert page.locator("#help-dialog").is_visible()
     assert page.locator("#help-search").evaluate("e => e === document.activeElement")
-    page.locator("#help-search").fill("Nadi")
+    page.locator("#help-search").fill("What does Nadi mean?")
     assert "Nadi" in page.locator("#help-topic h3").inner_text()
-    page.screenshot(path=str(ARTIFACTS / "studio-help.png"))
+    page.screenshot(animations="disabled", path=str(ARTIFACTS / "studio-help.png"))
     page.locator("#help-search").fill("unfindablezzzzz")
     assert "No matching term" in page.locator("#help-topic").inner_text()
     page.keyboard.press("Escape")
@@ -31,14 +31,14 @@ with sync_playwright() as playwright:
     assert help_button.evaluate("e => e === document.activeElement")
     page.emulate_media(reduced_motion="reduce")
     assert page.evaluate("document.documentElement.dataset.theme") == "dark"
-    page.screenshot(path=str(ARTIFACTS / "desktop-dark.png"), full_page=True)
+    page.screenshot(animations="disabled", path=str(ARTIFACTS / "desktop-dark.png"), full_page=True)
     page.locator("#theme-toggle").click()
     # Future steps cannot bypass validation, and the first invalid input gets focus.
     page.locator('[data-flow-step="2"]').click()
     assert page.locator("#groom-name").get_attribute("aria-invalid") == "true"
     assert page.locator("#groom-name").evaluate("e => e === document.activeElement")
     assert "groom-name-error" in page.locator("#groom-name").get_attribute("aria-describedby")
-    page.screenshot(path=str(ARTIFACTS / "flow-error.png"))
+    page.screenshot(animations="disabled", path=str(ARTIFACTS / "flow-error.png"))
     for person, name, day in [("groom", "Test A", "1992-03-14"), ("bride", "Test B", "1994-11-02")]:
         page.locator("#" + person + "-name").fill(name)
         page.locator("#" + person + "-date").fill(day)
@@ -59,7 +59,7 @@ with sync_playwright() as playwright:
     page.locator("#groom-name").fill("Test A")
     page.locator('#birth-form button[type="submit"]').click()
     assert page.locator("#review-step").is_visible(), "Editing one person must return directly to review"
-    page.screenshot(path=str(ARTIFACTS / "flow-review.png"))
+    page.screenshot(animations="disabled", path=str(ARTIFACTS / "flow-review.png"))
     page.locator(".language-menu summary").click()
     page.locator('.locale-link[lang="hi"]').click()
     page.wait_for_url("**/hi/")
@@ -86,7 +86,7 @@ with sync_playwright() as playwright:
     section.locator(".factor-filter input").uncheck()
     page.locator(".report-section[open]>summary").click()
     page.set_viewport_size({"width": 1440, "height": 1100})
-    page.screenshot(path=str(ARTIFACTS / "studio-report.png"), full_page=True)
+    page.screenshot(animations="disabled", path=str(ARTIFACTS / "studio-report.png"), full_page=True)
     page.evaluate("navigator.share = data => { window.__shared = data; return Promise.resolve(); }")
     page.locator(".export-menu summary").click()
     page.locator("#share-result").click()
@@ -132,8 +132,8 @@ with sync_playwright() as playwright:
     page.locator('.locale-link[lang="hi"]').click()
     page.wait_for_url("**/hi/")
     assert page.locator("#reading").is_visible()
-    page.locator("#reading").screenshot(path=str(ARTIFACTS / "report-tools.png"))
-    page.screenshot(path=str(ARTIFACTS / "report-hindi.png"), full_page=True)
+    page.locator("#reading").screenshot(animations="disabled", path=str(ARTIFACTS / "report-tools.png"))
+    page.screenshot(animations="disabled", path=str(ARTIFACTS / "report-hindi.png"), full_page=True)
     assert page.evaluate("localStorage.length") == 0
     assert page.evaluate("sessionStorage.length") == 0
     assert not page.context.cookies()
@@ -154,7 +154,7 @@ with sync_playwright() as playwright:
     assert page.locator(".planet-buttons button[aria-pressed=true]").inner_text() == "Mars"
     assert "POSITION / Mars" in page.locator(".planet-detail").inner_text()
     assert page.locator(".chart-planet.selected").count() == 1
-    page.screenshot(path=str(ARTIFACTS / "studio-chart.png"), full_page=True)
+    page.screenshot(animations="disabled", path=str(ARTIFACTS / "studio-chart.png"), full_page=True)
     with page.expect_download(timeout=60000) as download:
         page.locator("#download-pdf").click()
     assert download.value.suggested_filename == "astro-chart.pdf"
@@ -186,7 +186,7 @@ with sync_playwright() as playwright:
         assert indicator["width"] >= 24 and indicator["height"] >= 24, locale + " progress target"
         assert page.locator("#flow-count").evaluate("e => getComputedStyle(e).direction") == "ltr"
         if locale in ["ta", "ur"]:
-            page.screenshot(path=str(ARTIFACTS / ("mobile-" + locale + ".png")), full_page=True)
+            page.screenshot(animations="disabled", path=str(ARTIFACTS / ("mobile-" + locale + ".png")), full_page=True)
         page.locator("#try-example").click()
         assert page.locator("#sample-notice").is_visible()
         assert page.locator("#review-step").is_visible()
@@ -196,9 +196,9 @@ with sync_playwright() as playwright:
         assert page.locator("#reading .notice").is_visible()
         assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth"), locale + " report"
         if locale == "en":
-            page.screenshot(path=str(ARTIFACTS / "flow-mobile.png"))
+            page.screenshot(animations="disabled", path=str(ARTIFACTS / "flow-mobile.png"))
         if locale == "ta":
-            page.locator("#reading").screenshot(path=str(ARTIFACTS / "flow-result.png"))
+            page.locator("#reading").screenshot(animations="disabled", path=str(ARTIFACTS / "flow-result.png"))
     page.set_viewport_size({"width": 1440, "height": 1100})
     page.goto("http://127.0.0.1:8000/en/")
     page.locator("#groom-place").fill("Hyder")
@@ -233,7 +233,7 @@ with sync_playwright() as playwright:
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
     page.goto("http://127.0.0.1:8000/en/guide/understand-your-report/")
     assert page.locator(".guide-article h2").first.is_visible()
-    page.screenshot(path=str(ARTIFACTS / "studio-guide-mobile.png"), full_page=True)
+    page.screenshot(animations="disabled", path=str(ARTIFACTS / "studio-guide-mobile.png"), full_page=True)
     no_js = browser.new_context(java_script_enabled=False)
     guide = no_js.new_page()
     guide.goto("http://127.0.0.1:8000/en/guide/")

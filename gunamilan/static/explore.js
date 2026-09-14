@@ -27,7 +27,8 @@
       results.querySelectorAll("button").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.term === key)));
     }
     function filter() {
-      queryWords = search.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
+      const stopWords = new Set(["what","does","is","a","an","the","how","do","i","my","mean","means","can","you","explain","please","tell","me","about","why","are","for","to"]);
+      queryWords = search.value.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu," ").trim().split(/\s+/).filter(word => word && !stopWords.has(word));
       const matches = Object.entries(knowledge).filter(([, item]) => termMatches(item));
       const query = queryWords.join(" ");
       const rank = item => item.title.toLowerCase() === query ? 3 : item.title.toLowerCase().startsWith(query) ? 2 : item.title.toLowerCase().includes(query) ? 1 : 0;
@@ -51,6 +52,11 @@
     }
     document.querySelector("#help-close").addEventListener("click", () => dialog.close());
     dialog.addEventListener("close", () => { if (opener?.isConnected) opener.focus({preventScroll:true}); });
+    dialog.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
+        event.preventDefault(); event.stopPropagation(); dialog.close();
+      }
+    });
     dialog.addEventListener("click", event => {
       if (event.target !== dialog) return;
       const rect = dialog.getBoundingClientRect();
@@ -167,7 +173,8 @@
       function select(g,i) {
         [...buttons.children].forEach((button,index) => button.setAttribute("aria-pressed",String(index===i)));
         dots.forEach((dot,index) => dot.setAttribute("class", index===i ? "chart-planet selected" : "chart-planet"));
-        const [x2,y2] = point(g.longitude,142); ray.setAttribute("x2",x2); ray.setAttribute("y2",y2);
+        const [x1,y1] = point(g.longitude,65), [x2,y2] = point(g.longitude,142);
+        ray.setAttribute("x1",x1); ray.setAttribute("y1",y1); ray.setAttribute("x2",x2); ray.setAttribute("y2",y2);
         detail.replaceChildren(el("span", "POSITION / " + g.name, "eyebrow"), el("h4",g.rashi),el("p",g.degrees + " · " + g.nakshatra + " · Pada " + g.pada));
         const dl = el("dl");
         for (const [name,value,key] of [["Sidereal longitude",g.longitude+"°","longitude"],["Navamsa",g.navamsa,"navamsa"],["House",g.house ?? "Unknown time","house"],["Dignity",g.dignity || "Not specified","dignity"],["Retrograde",g.retrograde?"Yes":"No","retrograde"],["Combust",g.combust?"Yes":"No","combust"]]) {
