@@ -15,6 +15,9 @@ from __future__ import annotations
 
 import datetime as dt
 from typing import Literal
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+
+from fastapi.responses import JSONResponse
 
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field, field_validator
@@ -58,9 +61,28 @@ class BirthInput(BaseModel):
     longitude: float | None = Field(None, ge=-180, le=180)
     timezone: str | None = Field(None, description="IANA name; inferred from place when omitted.")
 
+    @field_validator("timezone")
+    @classmethod
+    def valid_timezone(cls, v):
+        if v is not None:
+            try:
+                ZoneInfo(v)
+            except (ZoneInfoNotFoundError, ValueError):
+                raise ValueError("Use a valid IANA timezone")
+        return v
+
+    @field_validator("time")
+    @classmethod
+    def local_time_only(cls, v):
+        if v is not None and v.tzinfo is not None:
+            raise ValueError("Birth time must be local, without a UTC offset")
+        return v
+
     @field_validator("date")
     @classmethod
     def not_in_the_future(cls, v: dt.date) -> dt.date:
+        if v.year < 1800:
+            raise ValueError("birth dates before 1800 are not supported by this service")
         if v > dt.date.today():
             raise ValueError("birth date cannot be in the future")
         return v
@@ -306,3 +328,8 @@ def match_full(req: MatchRequest) -> dict:
     }
     result["full_charts"] = {"groom": _chart_dict(groom), "bride": _chart_dict(bride)}
     return result
+
+
+# Public documents are rendered on the server. Personal results are POST-only.
+from .web import install_web
+install_web(app)

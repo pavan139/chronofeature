@@ -19,8 +19,9 @@ import unicodedata
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
+import os
 
-DB_PATH = Path(__file__).parent / "data" / "places.db"
+DB_PATH = Path(os.environ.get("PLACES_DB", str(Path(__file__).parent / "data" / "places.db")))
 
 # Trailing words users add that are not part of the place name.
 NOISE_WORDS = {"india", "bharat", "city", "town", "village", "district", "dist"}
@@ -75,9 +76,16 @@ class PlaceNotFound(LookupError):
 
 
 def fold(text: str) -> str:
-    decomposed = unicodedata.normalize("NFKD", text)
-    stripped = "".join(c for c in decomposed if not unicodedata.combining(c))
-    return " ".join(stripped.lower().replace("-", " ").replace(".", "").split())
+    # Keep vowel signs and other meaningful marks in Indic scripts.
+    # Only Latin letters lose diacritics, preserving legacy Sitapur lookup.
+    parts = []
+    for char in unicodedata.normalize("NFC", text):
+        if "LATIN" in unicodedata.name(char, ""):
+            parts.append("".join(c for c in unicodedata.normalize("NFD", char)
+                                 if not unicodedata.combining(c)))
+        else:
+            parts.append(char)
+    return " ".join("".join(parts).casefold().replace("-", " ").replace(".", "").split())
 
 
 @lru_cache(maxsize=1)

@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ t.dir }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }} | Astro</title>
+<meta name="description" content="{{ t.intro }} {{ t.note }}">
+<meta name="robots" content="{{ 'index,follow' if indexable else 'noindex,follow' }}">
+<meta name="theme-color" content="#142b32">
+{% if canonical %}<link rel="canonical" href="{{ canonical }}"><meta property="og:url" content="{{ canonical }}">{% endif %}
+{% for a in alternates %}<link rel="alternate" hreflang="{{ a.code }}" href="{{ a.url }}">{% endfor %}
+{% for a in alternates %}{% if a.code == 'en' %}<link rel="alternate" hreflang="x-default" href="{{ a.url }}">{% endif %}{% endfor %}
+<meta property="og:type" content="website"><meta property="og:title" content="{{ title }} | Astro">
+<meta property="og:description" content="{{ t.intro }}"><meta property="og:site_name" content="Astro">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/app.css">
+<script src="/static/app.js" defer></script>
+<script type="application/ld+json" nonce="{{ nonce }}">{{ schema|tojson }}</script>
+</head>
+<body data-view="{{ view }}" data-locale="{{ lang }}">
+<a class="skip" href="#workspace">{{ t.calculate }}</a>
+<header class="header">
+  <a href="/{{ lang }}/" class="brand" aria-label="Astro">
+    <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><path d="M16 2v28M2 16h28M6 6l20 20M6 26L26 6" stroke="currentColor" stroke-width="1.5"/><circle cx="16" cy="16" r="9" fill="none" stroke="currentColor"/></svg>
+    astro<span class="brand-dot">.</span>
+  </a>
+  <nav aria-label="{{ t.details }}" class="main-nav">
+    <a href="/{{ lang }}/" {% if view=='match' %}aria-current="page"{% endif %}>{{ t.match }}</a>
+    <a href="/{{ lang }}/porutham/" {% if view=='porutham' %}aria-current="page"{% endif %}>Porutham</a>
+    <a href="/{{ lang }}/birth-chart/" {% if view=='chart' %}aria-current="page"{% endif %}>{{ t.chart }}</a>
+  </nav>
+  <details class="language-menu">
+    <summary><span aria-hidden="true">◎</span> {{ t.language }} <span class="current-lang">{{ t.code|upper }}</span></summary>
+    <div class="languages">
+    {% for l in languages %}<a class="locale-link" href="/{{ l.code }}/{{ route }}" lang="{{ l.code }}" dir="{{ l.dir }}" {% if l.code==lang %}aria-current="true"{% endif %}>{{ l.nativeName }}</a>{% endfor %}
+    </div>
+  </details>
+</header>
+<main id="workspace">
+  <section class="intro">
+    <div class="eyebrow"><span class="short-line"></span> ASTRO / {{ '02' if view=='chart' else '01' }}</div>
+    <h1>{{ title }}</h1>
+    <p>{{ t.intro }}</p>
+  </section>
+  <div class="workspace">
+    <section class="input-panel" aria-labelledby="input-heading">
+      <div class="section-title"><span class="step">01</span><h2 id="input-heading">{{ t.details }}</h2><span class="small-word">Swiss Ephemeris</span></div>
+      <form id="birth-form" autocomplete="off">
+        <div class="people {{ 'single' if view=='chart' else '' }}">
+        {% for person in (['groom'] if view=='chart' else ['groom','bride']) %}
+          <fieldset class="person" data-person="{{ person }}">
+            <legend><span class="person-symbol" aria-hidden="true">{{ '☉' if person=='groom' else '☾' }}</span>{{ t.chart if view=='chart' else t[person] }}</legend>
+            <label for="{{ person }}-name">{{ t.name }}</label>
+            <input id="{{ person }}-name" name="{{ person }}-name" maxlength="80" required autocomplete="off" dir="auto">
+            <div class="date-time">
+              <div><label for="{{ person }}-date">{{ t.date }}</label><input id="{{ person }}-date" name="{{ person }}-date" type="date" min="1800-01-01" required></div>
+              <div><label for="{{ person }}-time">{{ t.time }}</label><input id="{{ person }}-time" name="{{ person }}-time" type="time" required></div>
+            </div>
+            <label class="check"><input type="checkbox" name="{{ person }}-unknown">{{ t.unknown }}</label>
+            <label for="{{ person }}-place">{{ t.place }}</label>
+            <div class="place-control">
+              <input id="{{ person }}-place" name="{{ person }}-place" placeholder="{{ t.search }}" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="{{ person }}-places" autocomplete="off" spellcheck="false" dir="auto">
+              <ul id="{{ person }}-places" class="suggestions" role="listbox" hidden></ul>
+            </div>
+            <p class="place-status" aria-live="polite"></p>
+            <details class="coordinates">
+              <summary>{{ t.manual }}</summary>
+              <div class="date-time">
+                <div><label for="{{ person }}-lat">{{ t.latitude }}</label><input type="number" id="{{ person }}-lat" name="{{ person }}-latitude" min="-90" max="90" step="any" inputmode="decimal" dir="ltr"></div>
+                <div><label for="{{ person }}-lon">{{ t.longitude }}</label><input type="number" id="{{ person }}-lon" name="{{ person }}-longitude" min="-180" max="180" step="any" inputmode="decimal" dir="ltr"></div>
+              </div>
+              <label for="{{ person }}-tz">{{ t.timezone }}</label>
+              <input id="{{ person }}-tz" name="{{ person }}-timezone" value="Asia/Kolkata" maxlength="80" dir="ltr" list="timezones">
+            </details>
+          </fieldset>
+        {% endfor %}
+        </div>
+        <div class="form-base">
+          <details class="settings">
+            <summary>{{ t.settings }}</summary>
+            <label for="ayanamsa">Ayanamsa</label>
+            <select name="ayanamsa" id="ayanamsa"><option value="lahiri">Lahiri</option><option value="raman">Raman</option><option value="krishnamurti">Krishnamurti</option><option value="fagan_bradley">Fagan–Bradley</option></select>
+          </details>
+          <p class="form-error" id="form-error" role="alert" tabindex="-1" hidden></p>
+          <button class="primary" type="submit"><span class="submit-label">{{ t.calculate }}</span><span aria-hidden="true" class="arrow">↗</span></button>
+          <div class="form-foot"><span>{{ t.privacy }}</span><button type="reset" class="text-button">{{ t.reset }}</button></div>
+        </div>
+      </form>
+      <noscript><p class="notice" lang="en">JavaScript is required to calculate a personal chart. These public pages remain readable without it.</p></noscript>
+    </section>
+    <aside class="reading-intro">
+      <div class="section-title"><span class="step">02</span><h2>{{ t.result }}</h2></div>
+      <div class="orbit" aria-hidden="true"><div class="orbit-inner"></div><span class="orbit-mark">✳</span><span class="orbit-a"></span><span class="orbit-b"></span></div>
+      <h3>{{ t.empty }}</h3>
+      <div class="traditions"><div><b>36</b><span>Ashtakoota</span></div><div><b>10</b><span>Porutham</span></div><div><b>09</b><span>Graha</span></div></div>
+      <p>{{ t.note }}</p>
+      <a href="#method" class="method-link">{{ t.method }} <span aria-hidden="true">↘</span></a>
+    </aside>
+  </div>
+  <section id="reading" class="reading" aria-labelledby="result-heading" tabindex="-1" hidden>
+    <div class="report-top"><div><div class="eyebrow">ASTRO / {{ t.result }}</div><h2 id="result-heading">{{ t.result }}</h2></div><div class="report-actions"><button id="edit" class="secondary">{{ t.edit }}</button><button id="print" class="primary">{{ t.print }}</button></div></div>
+    <div id="report-content"></div>
+    <p class="report-note">{{ t.note }}</p>
+  </section>
+  <section id="method" class="method">
+    <div class="eyebrow">03 / {{ t.method }}</div><h2>{{ t.note }}</h2>
+    <div class="method-grid">
+      <article><span>01</span><h3>Ashtakoota</h3><p>{{ t.score }} · 36</p><p class="terms">Varna · Vashya · Tara · Yoni · Graha Maitri · Gana · Bhakoot · Nadi</p></article>
+      <article><span>02</span><h3>Dasa Porutham</h3><p>{{ t.passed }} · 10</p><p class="terms">Dina · Gana · Mahendra · Stree Deergha · Yoni · Rasi · Rasyadhipathi · Vashya · Rajju · Vedha</p></article>
+      <article><span>03</span><h3>{{ t.chart }}</h3><p>Rashi · Navamsa · Vimshottari</p><p class="terms">{{ t.unknown }} → {{ t.review }}</p></article>
+    </div>
+    <details class="method-technical"><summary>{{ t.details }} <span lang="en">(English)</span></summary>
+      <div lang="en" dir="ltr">
+      <h3>How this calculator works</h3>
+      <p>The Python engine calculates sidereal positions with Swiss Ephemeris. Lahiri is the default ayanamsa. You can also select Raman, Krishnamurti or Fagan–Bradley. The birth date, local time, coordinates and timezone determine the chart. Choose the exact place from the search results, or enter its coordinates and IANA timezone.</p>
+      <h3>Two systems, separate results</h3>
+      <p>Ashtakoota adds eight factors to a maximum of 36 points. Dasa Porutham checks ten factors, including essential checks such as Rajju and Vedha. A high total does not remove a failed essential check. Nadi and Bhakoot exceptions are reported separately and never added back to the arithmetic.</p>
+      <h3>What an unknown time changes</h3>
+      <p>With an unknown time the engine uses local noon as an approximation. It omits the ascendant and house numbers. The Moon may change sign, nakshatra or pada during the day. Scores can therefore change. A score is not a probability of marital success, and these traditional rules are not evidence of health, fertility or future events.</p>
+      <h3>Language and data</h3>
+      <p>The interface is available in English and 22 Indian languages. Translations are initial drafts pending native-speaker review. Engine rule explanations and some proper names remain in their original language, identified explicitly in the report. No third-party translation service receives birth details. Place search needs the GeoNames database built by the repository's setup script. Coordinate entry works without it.</p>
+      <p>We store no birth details in a database, cookies, browser storage or share links. Changing language keeps the form in this page's memory. Closing or refreshing the page clears the form.</p>
+      </div>
+    </details>
+  </section>
+</main>
+<footer><a class="brand" href="/{{ lang }}/">astro<span class="brand-dot">.</span></a><p>{{ t.privacy }}</p><a href="https://www.geonames.org/" rel="noreferrer">GeoNames · CC BY 4.0</a></footer>
+<datalist id="timezones"><option value="Asia/Kolkata"><option value="Asia/Kathmandu"><option value="Asia/Dhaka"><option value="Asia/Colombo"><option value="Asia/Dubai"><option value="Europe/London"><option value="America/New_York"><option value="America/Los_Angeles"><option value="Australia/Sydney"><option value="UTC"></datalist>
+<div id="messages" hidden>{% for key in ['error','unavailable','loading','calculate','result','score','passed','review','details','unknown','note','groom','bride','chart','empty'] %}<span data-key="{{ key }}">{{ t[key] }}</span>{% endfor %}</div>
+</body></html>

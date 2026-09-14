@@ -17,6 +17,18 @@ from __future__ import annotations
 import datetime as dt
 from dataclasses import dataclass
 from zoneinfo import ZoneInfo
+from functools import wraps
+from threading import RLock
+
+_SWE_LOCK = RLock()
+
+def _serialized(fn):
+    @wraps(fn)
+    def call(*args, **kwargs):
+        with _SWE_LOCK:
+            return fn(*args, **kwargs)
+    return call
+
 
 import swisseph as swe
 
@@ -224,6 +236,7 @@ def _dignity(name: str, rashi: int) -> str:
     return "neutral"
 
 
+@_serialized
 def cast_chart(birth: BirthData, ayanamsa: str = "lahiri",
                true_node: bool = True) -> Chart:
     """Compute sidereal positions for all nine grahas plus the ascendant.
@@ -283,6 +296,7 @@ def house_from(reference: Position, planet: Position) -> int:
     return ((planet.rashi - reference.rashi) % 12) + 1
 
 
+@_serialized
 def transit_positions(when: dt.datetime, ayanamsa: str = "lahiri") -> dict[str, Position]:
     """Sidereal positions at a moment, used for transit work such as Sade Sati."""
     swe.set_sid_mode(AYANAMSA[ayanamsa], 0, 0)

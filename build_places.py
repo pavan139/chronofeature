@@ -76,9 +76,16 @@ CREATE INDEX idx_places_pop ON places(population DESC);
 
 def fold(text: str) -> str:
     """Strip diacritics and case so 'Sitapur', 'Sītāpur' and 'SITAPUR' all match."""
-    decomposed = unicodedata.normalize("NFKD", text)
-    stripped = "".join(c for c in decomposed if not unicodedata.combining(c))
-    return " ".join(stripped.lower().replace("-", " ").replace(".", "").split())
+    # Keep vowel signs and other meaningful marks in Indic scripts.
+    # Only Latin letters lose diacritics, preserving legacy Sitapur lookup.
+    parts = []
+    for char in unicodedata.normalize("NFC", text):
+        if "LATIN" in unicodedata.name(char, ""):
+            parts.append("".join(c for c in unicodedata.normalize("NFD", char)
+                                 if not unicodedata.combining(c)))
+        else:
+            parts.append(char)
+    return " ".join("".join(parts).casefold().replace("-", " ").replace(".", "").split())
 
 
 def load_admin1(path: Path) -> dict[str, str]:
@@ -92,7 +99,7 @@ def load_admin1(path: Path) -> dict[str, str]:
 
 
 def spellings(row: list[str], keep_aliases: bool) -> list[str]:
-    """Every Latin-script name this place should answer to, folded.
+    """Every supplied name this place should answer to, folded.
 
     Curated aliases go in before the GeoNames alternates. The list is capped,
     and GeoNames can carry dozens of transliterations for a major city, so
@@ -106,7 +113,7 @@ def spellings(row: list[str], keep_aliases: bool) -> list[str]:
         names.extend(EXTRA_ALIASES.get(row[NAME], []))
         for alt in row[ALT].split(","):
             alt = alt.strip()
-            if alt and alt.isascii() and 1 < len(alt) <= 40:
+            if alt and 1 < len(alt) <= 80:
                 names.append(alt)
 
     seen, out = set(), []
@@ -115,7 +122,7 @@ def spellings(row: list[str], keep_aliases: bool) -> list[str]:
         if key and key not in seen:
             seen.add(key)
             out.append(key)
-    return out[:12]
+    return out
 
 
 def iter_rows(path: Path, india_only: bool):
@@ -155,7 +162,7 @@ def main(src: str, dest: str) -> None:
             row[CC], float(row[LAT]), float(row[LON]), row[TZ], pop,
         ))
         # Aliases balloon the index and add little for unnamed hamlets.
-        for folded in spellings(row, keep_aliases=pop > 0):
+        for folded in spellings(row, keep_aliases=True):
             names.append((folded, gid))
 
     for row in iter_rows(src_dir / "IN.txt", india_only=True):

@@ -218,7 +218,7 @@ def rasi_porutham(groom: Position, bride: Position) -> PoruthamResult:
         passed, "essential",
         groom.rashi_name, bride.rashi_name,
         f"The groom's sign is {count} from the bride's. "
-        + ("Seven or beyond, which satisfies the porutham."
+        + ("Same sign or seven or beyond, which satisfies the porutham."
            if passed else
            "Under seven, which the tradition reads as unfavourable for the family line."),
     )

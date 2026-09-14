@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+*.egg-info/
+build/
+dist/
+data/
+gunamilan/data/
+.pytest_cache/
+test-results/
+playwright-report/

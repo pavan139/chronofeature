@@ -1,0 +1,45 @@
+name: Application quality
+on:
+  push:
+    branches: [main, feat/multilingual-frontend]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install application and test dependencies
+        run: pip install -e '.[test]'
+      - name: Cache offline places
+        uses: actions/cache@v4
+        with:
+          path: gunamilan/data/places.db
+          key: geonames-multiscript-v1
+      - name: Build places when absent
+        run: |
+          if [ ! -f gunamilan/data/places.db ]; then
+            python scripts/fetch_places.py
+          fi
+      - name: Engine and HTTP tests
+        run: python -m pytest -q
+      - name: Install browser
+        run: python -m playwright install --with-deps chromium
+      - name: Browser integration and screenshots
+        run: |
+          uvicorn gunamilan.api:app --host 127.0.0.1 --port 8000 > /tmp/astro-server.log 2>&1 &
+          python -c "import urllib.request,time; [(time.sleep(1)) for _ in range(3)]; urllib.request.urlopen('http://127.0.0.1:8000/health')"
+          python tests/browser_ui.py
+      - name: Save review screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: interface-review
+          path: test-results/
+          if-no-files-found: ignore
