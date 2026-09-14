@@ -251,7 +251,8 @@
           if (target.tagName === "DETAILS") target.open = true;
           let parent = target.parentElement;
           while (parent && parent !== output) { if (parent.tagName === "DETAILS") parent.open = true; parent = parent.parentElement; }
-          heading.tabIndex = -1; heading.focus({preventScroll:true});
+          if (heading.tagName !== "SUMMARY") heading.tabIndex = -1;
+          heading.focus({preventScroll:true});
           target.scrollIntoView({block:"start", behavior:"auto"});
         });
         nav.append(button);

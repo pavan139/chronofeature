@@ -82,6 +82,9 @@ with sync_playwright() as playwright:
     assert page.locator(".report-section[open]").count() == 0
     assert page.locator(".analysis-overview").is_visible()
     assert page.locator(".report-navigation button").count() >= 5
+    page.locator(".report-navigation button").nth(1).click()
+    assert page.locator(".report-section[open]>summary").evaluate("e => e === document.activeElement && e.tabIndex === 0")
+    page.locator(".report-section[open]>summary").click()
     page.locator(".report-navigation button").last.click()
     assert page.locator(".next-steps h3").evaluate("e => e === document.activeElement")
     page.locator(".next-steps input").first.check()
