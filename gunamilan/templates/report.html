@@ -37,7 +37,7 @@
 {% for who in ['groom','bride'] %}<div class="details"><strong>{{ who|title }}</strong><p>{{ d[who].detail }}</p>{% for note in d[who].cancellations or [] %}<p>{{ note }}</p>{% endfor %}</div>{% endfor %}
 {% endfor %}</section>{% endif %}
 {% endif %}
-{% for chart in charts %}<section class="section"><h2>{{ t.chart }}</h2><p class="report-heading" dir="auto">{{ chart.name }}</p>
+{% for chart in charts %}<section class="{{ 'section' if mode == 'match' else 'chart-section' }}"><h2>{{ t.chart }}</h2><p class="report-heading" dir="auto">{{ chart.name }}</p>
 <div lang="en" dir="ltr"><p class="source">SIDEREAL POSITIONS / ENGLISH</p>
 {% if chart.ascendant %}<p>Lagna: {{ chart.ascendant.rashi }} | {{ chart.ascendant.degrees }} | Navamsa: {{ chart.ascendant.navamsa }}</p>{% else %}<p class="notice">Birth time unknown. Ascendant and house numbers are omitted.</p>{% endif %}
 <table><thead><tr><th>Graha</th><th>Rashi</th><th>Degrees</th><th>Nakshatra</th><th>Pada</th><th>Navamsa</th><th>House</th></tr></thead><tbody>
