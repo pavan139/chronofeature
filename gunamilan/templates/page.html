@@ -4,16 +4,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{ title }} | Astro</title>
-<meta name="description" content="{{ t.intro }} {{ t.note }}">
+<meta name="description" content="{{ description }}">
 <meta name="robots" content="{{ 'index,follow' if indexable else 'noindex,follow' }}">
 <meta name="theme-color" content="#142b32">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="Astro">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 {% if canonical %}<link rel="canonical" href="{{ canonical }}"><meta property="og:url" content="{{ canonical }}">{% endif %}
-{% for a in alternates %}<link rel="alternate" hreflang="{{ a.code }}" href="{{ a.url }}">{% endfor %}
+{% for a in alternates %}<link rel="alternate" hreflang="{{ a.code }}" href="{{ a.url }}"><meta property="og:locale:alternate" content="{{ a.code }}_IN">{% endfor %}
 {% for a in alternates %}{% if a.code == 'en' %}<link rel="alternate" hreflang="x-default" href="{{ a.url }}">{% endif %}{% endfor %}
 <meta property="og:type" content="website"><meta property="og:title" content="{{ title }} | Astro">
-<meta property="og:description" content="{{ t.intro }}"><meta property="og:site_name" content="Astro">
-<meta name="twitter:card" content="summary">
+<meta property="og:description" content="{{ description }}"><meta property="og:site_name" content="Astro">
+<meta property="og:locale" content="{{ og_locale }}">
+<meta name="twitter:card" content="summary"><meta name="twitter:title" content="{{ title }} | Astro">
+<meta name="twitter:description" content="{{ description }}">
 <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/static/favicon.svg">
+<link rel="manifest" href="/manifest.webmanifest">
 <link rel="stylesheet" href="/static/app.css">
 <script src="/static/app.js" defer></script>
 <script type="application/ld+json" nonce="{{ nonce }}">{{ schema|tojson }}</script>
@@ -30,18 +39,26 @@
     <a href="/{{ lang }}/porutham/" {% if view=='porutham' %}aria-current="page"{% endif %}>Porutham</a>
     <a href="/{{ lang }}/birth-chart/" {% if view=='chart' %}aria-current="page"{% endif %}>{{ t.chart }}</a>
   </nav>
+  <div class="utility-actions">
+  <button id="theme-toggle" class="icon-button" type="button" title="{{ t.theme }}" aria-label="{{ t.theme }}"><span aria-hidden="true">◐</span></button>
   <details class="language-menu">
     <summary><span aria-hidden="true">◎</span> {{ t.language }} <span class="current-lang">{{ t.code|upper }}</span></summary>
     <div class="languages">
     {% for l in languages %}<a class="locale-link" href="/{{ l.code }}/{{ route }}" lang="{{ l.code }}" dir="{{ l.dir }}" {% if l.code==lang %}aria-current="true"{% endif %}>{{ l.nativeName }}</a>{% endfor %}
     </div>
   </details>
+  </div>
 </header>
 <main id="workspace">
   <section class="intro">
     <div class="eyebrow"><span class="short-line"></span> ASTRO / {{ '02' if view=='chart' else '01' }}</div>
     <h1>{{ title }}</h1>
     <p>{{ t.intro }}</p>
+    <div class="intro-actions">
+      <button id="share-page" class="share-button" type="button"><span aria-hidden="true">↗</span> {{ t.share }}</button>
+      <button id="install-app" class="share-button" type="button" hidden><span aria-hidden="true">↓</span> {{ t.install }}</button>
+      <span id="share-status" class="share-status" role="status" aria-live="polite"></span>
+    </div>
   </section>
   <div class="workspace">
     <section class="input-panel" aria-labelledby="input-heading">
@@ -99,7 +116,7 @@
     </aside>
   </div>
   <section id="reading" class="reading" aria-labelledby="result-heading" tabindex="-1" hidden>
-    <div class="report-top"><div><div class="eyebrow">ASTRO / {{ t.result }}</div><h2 id="result-heading">{{ t.result }}</h2></div><div class="report-actions"><button id="edit" class="secondary">{{ t.edit }}</button><button id="print" class="primary">{{ t.print }}</button></div></div>
+    <div class="report-top"><div><div class="eyebrow">ASTRO / {{ t.result }}</div><h2 id="result-heading">{{ t.result }}</h2></div><div class="report-actions"><button id="share-result" class="secondary">{{ t.share }}</button><button id="edit" class="secondary">{{ t.edit }}</button><button id="print" class="primary">{{ t.print }}</button></div></div>
     <div id="report-content"></div>
     <p class="report-note">{{ t.note }}</p>
   </section>
@@ -127,5 +144,5 @@
 </main>
 <footer><a class="brand" href="/{{ lang }}/">astro<span class="brand-dot">.</span></a><p>{{ t.privacy }}</p><a href="https://www.geonames.org/" rel="noreferrer">GeoNames · CC BY 4.0</a></footer>
 <datalist id="timezones"><option value="Asia/Kolkata"><option value="Asia/Kathmandu"><option value="Asia/Dhaka"><option value="Asia/Colombo"><option value="Asia/Dubai"><option value="Europe/London"><option value="America/New_York"><option value="America/Los_Angeles"><option value="Australia/Sydney"><option value="UTC"></datalist>
-<div id="messages" hidden>{% for key in ['error','unavailable','loading','calculate','result','score','passed','review','details','unknown','note','groom','bride','chart','empty'] %}<span data-key="{{ key }}">{{ t[key] }}</span>{% endfor %}</div>
+<div id="messages" hidden>{% for key in ['error','unavailable','loading','calculate','result','score','passed','review','details','unknown','note','groom','bride','chart','empty','share','copy','copied','install','theme'] %}<span data-key="{{ key }}">{{ t[key] }}</span>{% endfor %}</div>
 </body></html>

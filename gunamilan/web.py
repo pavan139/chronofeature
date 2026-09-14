@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 from xml.sax.saxutils import escape
 
 from fastapi import HTTPException, Request
-from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.gzip import GZipMiddleware
 from fastapi.templating import Jinja2Templates
@@ -63,6 +63,20 @@ def install_web(app):
     def root():
         return RedirectResponse("/en/", status_code=302)
 
+    @app.get("/manifest.webmanifest", include_in_schema=False)
+    def manifest():
+        return JSONResponse({
+            "name": "Astro · Vedic compatibility",
+            "short_name": "Astro",
+            "description": "Private-by-design Kundali matching and sidereal birth charts.",
+            "start_url": "/en/",
+            "scope": "/",
+            "display": "standalone",
+            "background_color": "#f6f8f8",
+            "theme_color": "#142b32",
+            "icons": [{"src": "/static/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}],
+        }, media_type="application/manifest+json")
+
     @app.get("/robots.txt", include_in_schema=False)
     def robots():
         if not index_locales():
@@ -96,14 +110,36 @@ def install_web(app):
         alternates = [{"code": code, "url": origin + "/" + code + "/" + route}
                       for code in sorted(index_locales()) if len(code) == 2] if origin else []
         title = t["chart"] if view == "chart" else ("Dasa Porutham · " + t["title"] if view == "porutham" else t["title"])
+        descriptions = {
+            "match": t["intro"] + " " + t["note"],
+            "porutham": "Dasa Porutham. " + t["intro"] + " " + t["note"],
+            "chart": t["chart"] + ". " + t["intro"] + " " + t["note"],
+        }
+        description = descriptions[view]
+        page_id = canonical or "/" + lang + "/" + route
+        schema = {
+            "@context": "https://schema.org",
+            "@graph": [
+                {"@type": "WebSite", "@id": (origin + "/#website") if origin else "/#website",
+                 "name": "Astro", **({"url": origin + "/"} if origin else {})},
+                {"@type": "WebApplication", "@id": page_id + "#app", "name": title,
+                 "applicationCategory": "LifestyleApplication", "operatingSystem": "Web",
+                 "isAccessibleForFree": True, "inLanguage": lang, "description": description,
+                 "featureList": ["Ashtakoota", "Dasa Porutham", "Sidereal birth chart", "Vimshottari dasha"],
+                 **({"url": canonical} if canonical else {})},
+                {"@type": "WebPage", "@id": page_id + "#page", "name": title,
+                 "description": description, "inLanguage": lang,
+                 "isPartOf": {"@id": (origin + "/#website") if origin else "/#website"},
+                 "mainEntity": {"@id": page_id + "#app"},
+                 **({"url": canonical} if canonical else {})},
+            ],
+        }
         response = TEMPLATES.TemplateResponse(request=request, name="page.html", context={
             "t": t, "languages": list(messages.values()), "lang": lang, "view": view,
-            "title": title, "canonical": canonical, "alternates": alternates,
+            "title": title, "description": description, "og_locale": lang.replace("-", "_") + "_IN",
+            "canonical": canonical, "alternates": alternates,
             "indexable": indexable, "route": route, "nonce": request.state.nonce,
-            "schema": {"@context": "https://schema.org", "@type": "WebApplication",
-                       "name": "Astro", "applicationCategory": "LifestyleApplication",
-                       "operatingSystem": "Web", "inLanguage": lang,
-                       "description": t["intro"], **({"url": canonical} if canonical else {})},
+            "schema": schema,
         })
         response.headers["Content-Language"] = lang
         response.headers["X-Robots-Tag"] = "index, follow" if indexable else "noindex, follow"

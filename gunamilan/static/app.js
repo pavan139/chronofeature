@@ -1,6 +1,14 @@
 (() => {
   "use strict";
-  let generation = 0, cleanup = () => {}, capture = () => ({});
+  let generation = 0, cleanup = () => {}, capture = () => ({}), installPrompt = null;
+  if (matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.dataset.theme = "dark";
+  window.addEventListener("beforeinstallprompt", event => {
+    event.preventDefault(); installPrompt = event;
+    document.querySelector("#install-app")?.removeAttribute("hidden");
+  });
+  window.addEventListener("appinstalled", () => {
+    installPrompt = null; document.querySelector("#install-app")?.setAttribute("hidden", "");
+  });
   const node = (tag, text, cls) => {
     const el = document.createElement(tag);
     if (text !== undefined && text !== null) el.textContent = String(text);
@@ -15,9 +23,40 @@
     const output = document.querySelector("#report-content"), error = document.querySelector("#form-error");
     const button = form.querySelector('[type="submit"]'), label = button.querySelector(".submit-label");
     const locale = document.documentElement.lang, view = document.body.dataset.view;
+    const shareStatus = document.querySelector("#share-status"), installButton = document.querySelector("#install-app");
+    let shareSummary = "";
     const controllers = new Set(), timers = new Set(), selected = new Map();
     let resultController;
     const val = name => form.elements.namedItem(name);
+    const cleanUrl = () => document.querySelector('link[rel="canonical"]')?.href || location.origin + location.pathname;
+    async function share(text = document.title) {
+      const data = {title: document.title, text, url: cleanUrl()};
+      try {
+        if (navigator.share) await navigator.share(data);
+        else {
+          await navigator.clipboard.writeText(data.url);
+          shareStatus.textContent = t.copied;
+          const timer = setTimeout(() => shareStatus.textContent = "", 2600); timers.add(timer);
+        }
+      } catch (err) {
+        if (err.name !== "AbortError") shareStatus.textContent = t.copy + ": " + data.url;
+      }
+    }
+    document.querySelector("#share-page").addEventListener("click", () => share());
+    document.querySelector("#share-result").addEventListener("click", () => share(shareSummary || document.title));
+    document.querySelector("#theme-toggle").setAttribute("aria-pressed", String(document.documentElement.dataset.theme === "dark"));
+    document.querySelector("#theme-toggle").addEventListener("click", () => {
+      const dark = document.documentElement.dataset.theme !== "dark";
+      if (dark) document.documentElement.dataset.theme = "dark";
+      else delete document.documentElement.dataset.theme;
+      document.querySelector("#theme-toggle").setAttribute("aria-pressed", String(dark));
+      document.querySelector('meta[name="theme-color"]').content = dark ? "#0d1f24" : "#142b32";
+    });
+    if (installPrompt) installButton.hidden = false;
+    installButton.addEventListener("click", async () => {
+      if (!installPrompt) return;
+      await installPrompt.prompt(); installPrompt = null; installButton.hidden = true;
+    });
     const number = value => {
       try { return new Intl.NumberFormat(locale, {maximumFractionDigits: 1}).format(value); }
       catch { return String(value); }
@@ -242,6 +281,11 @@
           sourceDetails(output,t.details,[data.accuracy_warning]);
         }
         if (view === "chart") renderChart(data); else renderMatch(data);
+        shareSummary = [...output.querySelectorAll(".score-card")].map(card => {
+          const name = card.querySelector(".score-label")?.textContent || "";
+          const score = card.querySelector(".score-value")?.textContent.replace(/\s+/g, " ").trim() || "";
+          return name + " " + score;
+        }).filter(Boolean).join(" · ") || document.title;
         reading.hidden = false;
         document.querySelector("#result-heading").textContent = view === "chart" ? body.name : body.groom.name + " & " + body.bride.name;
         reading.focus({preventScroll:true});
@@ -286,7 +330,7 @@
       document.documentElement.lang = doc.documentElement.lang;
       document.documentElement.dir = doc.documentElement.dir;
       document.title = doc.title;
-      for (const selector of ['meta[name="description"]','meta[name="robots"]','meta[property^="og:"]','link[rel="canonical"]','link[rel="alternate"]']) {
+      for (const selector of ['meta[name="description"]','meta[name="robots"]','meta[name^="twitter:"]','meta[property^="og:"]','link[rel="canonical"]','link[rel="alternate"]']) {
         document.head.querySelectorAll(selector).forEach(el => el.remove());
         doc.head.querySelectorAll(selector).forEach(el => document.head.append(document.importNode(el,true)));
       }

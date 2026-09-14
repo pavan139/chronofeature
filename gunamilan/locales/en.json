@@ -36,5 +36,10 @@
   "empty": "Your reading starts with your birth details.",
   "search": "Search for a town or village",
   "settings": "Calculation settings",
-  "nativeName": "English"
+  "nativeName": "English",
+  "share": "Share",
+  "copy": "Copy link",
+  "copied": "Link copied",
+  "install": "Install app",
+  "theme": "Change theme"
 }

@@ -11,6 +11,10 @@ with sync_playwright() as playwright:
     page.on("pageerror", lambda error: errors.append(str(error)))
     page.goto("http://127.0.0.1:8000/en/")
     page.screenshot(path=str(ARTIFACTS / "desktop.png"), full_page=True)
+    page.locator("#theme-toggle").click()
+    assert page.evaluate("document.documentElement.dataset.theme") == "dark"
+    page.screenshot(path=str(ARTIFACTS / "desktop-dark.png"), full_page=True)
+    page.locator("#theme-toggle").click()
     for person, name, day in [("groom", "Test A", "1992-03-14"), ("bride", "Test B", "1994-11-02")]:
         page.locator("#" + person + "-name").fill(name)
         page.locator("#" + person + "-date").fill(day)
@@ -28,6 +32,11 @@ with sync_playwright() as playwright:
     assert page.locator(".score-card").count() == 2
     assert page.locator("#reading table").count() == 2
     assert not page.locator("#form-error").is_visible()
+    page.evaluate("navigator.share = data => { window.__shared = data; return Promise.resolve(); }")
+    page.locator("#share-result").click()
+    shared = page.evaluate("window.__shared")
+    assert "Test A" not in shared["text"] and "Test B" not in shared["text"]
+    assert "?" not in shared["url"]
     page.screenshot(path=str(ARTIFACTS / "report-hindi.png"), full_page=True)
     assert page.evaluate("localStorage.length") == 0
     assert page.evaluate("sessionStorage.length") == 0

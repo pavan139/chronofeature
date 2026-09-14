@@ -61,7 +61,7 @@ jobs:
           python - <<'PY'
           import base64
           from pathlib import Path
-          for name in ["desktop.png", "mobile-ta.png", "mobile-ur.png"]:
+          for name in ["desktop.png", "desktop-dark.png", "report-hindi.png", "mobile-ta.png", "mobile-ur.png"]:
               p = Path("test-results") / name
               if p.exists():
                   print("ASTRO_IMAGE_" + name + "=" + base64.b64encode(p.read_bytes()).decode())

@@ -112,3 +112,20 @@ def test_parallel_ayanamsas_match_serial_results():
 def test_user_input_is_not_reflected_in_public_document():
     response = client.get("/en/?name=%3Cscript%3Ealert(1)%3C/script%3E")
     assert "alert(1)" not in response.text
+
+def test_manifest_and_structured_metadata_are_machine_readable(monkeypatch):
+    manifest = client.get("/manifest.webmanifest")
+    assert manifest.status_code == 200
+    assert manifest.headers["content-type"].startswith("application/manifest+json")
+    assert manifest.json()["start_url"] == "/en/"
+    monkeypatch.setenv("SITE_URL", "https://astro.example.org")
+    monkeypatch.setenv("INDEXABLE", "true")
+    page = client.get("/en/birth-chart/")
+    assert 'rel="manifest" href="/manifest.webmanifest"' in page.text
+    assert 'name="twitter:description"' in page.text
+    start = page.text.index('<script type="application/ld+json"')
+    payload = page.text[page.text.index(">", start) + 1:page.text.index("</script>", start)]
+    graph = json.loads(payload)["@graph"]
+    assert {item["@type"] for item in graph} == {"WebSite", "WebApplication", "WebPage"}
+    assert graph[1]["name"] == "Birth chart"
+    assert graph[2]["mainEntity"]["@id"].endswith("#app")

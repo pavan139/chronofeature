@@ -17,7 +17,9 @@ Open http://127.0.0.1:8000/en/. Coordinate-based charts and matching work withou
 ## Interface
 - Two-person compatibility form with Ashtakoota and Dasa Porutham shown separately.
 - Natal chart, Navamsa, Vimshottari periods, doshas and explicit exceptions.
-- Responsive ink-and-copper theme, keyboard place selection, visible focus and reduced-motion support.
+- Responsive ink-and-copper theme, session-only dark mode, keyboard place selection, visible focus and reduced-motion support.
+- Privacy-safe Web Share and link-copy actions. Shared URLs never contain names, dates, places or calculation inputs.
+- Installable web-app manifest with standalone display metadata.
 - Localized date formatting, explicit unknown-time state, print stylesheet.
 - Language switching retains entered details in page memory. Refresh clears them.
 - No birth details in URLs, cookies, localStorage, sessionStorage or application databases.
@@ -38,7 +40,7 @@ Pages render substantive controls and headings on the server. Each language has 
 - `/{locale}/porutham/`: Dasa Porutham
 - `/{locale}/birth-chart/`: natal chart
 
-Metadata, Open Graph titles, canonical URLs, supported-language hreflang alternates, x-default, WebApplication structured data, sitemap and robots are generated from configuration. Unknown routes return 404. No invented testimonials, ratings, doorway location pages or unverified ranking claims are included.
+Route-specific titles and descriptions, Open Graph and X metadata, canonical URLs, supported-language hreflang alternates, x-default, WebSite/WebPage/WebApplication JSON-LD, sitemap, robots and a web-app manifest are generated from configuration. Unknown routes return 404. No invented testimonials, ratings, doorway location pages or unverified ranking claims are included.
 
 By default all pages are **noindex** and robots disallows crawling. A private repository does not make a deployed web service private. Authentication belongs to the chosen host or reverse proxy.
 
