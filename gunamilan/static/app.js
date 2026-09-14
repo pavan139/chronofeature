@@ -29,6 +29,11 @@
     const toggleDetails = document.querySelector("#toggle-details"), objectUrls = new Set();
     const controllers = new Set(), timers = new Set(), selected = new Map();
     let resultController;
+    const workspace = document.querySelector(".workspace"), people = [...form.querySelectorAll("[data-person]")];
+    const reviewStep = document.querySelector("#review-step"), reviewPeople = document.querySelector("#review-people");
+    const exampleButton = document.querySelector("#try-example"), sampleNotice = document.querySelector("#sample-notice");
+    const resetStatus = document.querySelector("#reset-status");
+    let step = 0, sample = false, resetSnapshot = null, resetTimer;
     const val = name => form.elements.namedItem(name);
     const cleanUrl = () => document.querySelector('link[rel="canonical"]')?.href || location.origin + location.pathname;
     async function share(text = document.title) {
@@ -75,26 +80,47 @@
     capture = () => ({
       fields: [...form.elements].filter(el => el.name).map(el => [el.name, el.type === "checkbox" ? el.checked : el.value]),
       selected: [...selected], open: [...form.querySelectorAll(".coordinates")].map(el => el.open),
-      view, report: lastReport, request: lastRequest, ayanamsa: lastAyanamsa, calculatedAt
+      view, report: lastReport, request: lastRequest, ayanamsa: lastAyanamsa, calculatedAt,
+      step, sample, showingReport: !reading.hidden
     });
+    function forgetUndo() {
+      resetSnapshot = null; resetStatus.hidden = true; clearTimeout(resetTimer);
+    }
+    function updateExample() {
+      exampleButton.hidden = people.some(el => [...el.querySelectorAll("input")].some(input =>
+        input.type === "checkbox" ? input.checked : input.name.endsWith("-timezone") ? input.value !== "Asia/Kolkata" : input.value.trim()));
+      sampleNotice.hidden = !sample;
+    }
     function invalidate() {
       reading.hidden = true;
       lastReport = null; lastRequest = null; calculatedAt = null; shareSummary = "";
       if (pdfController) pdfController.abort("edit");
       if (resultController) resultController.abort("edit");
+      forgetUndo(); updateExample();
     }
     form.addEventListener("input", invalidate);
     form.addEventListener("change", invalidate);
     const today = new Date();
     const maxDate = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2,"0") + "-" + String(today.getDate()).padStart(2,"0");
-    const closeMenus = () => document.querySelectorAll(".language-menu").forEach(el => el.open = false);
+    const closeMenus = (restoreFocus = false) => document.querySelectorAll(".language-menu,.export-menu").forEach(el => {
+      if (restoreFocus && el.open && el.contains(document.activeElement)) el.querySelector("summary").focus();
+      el.open = false;
+    });
+    document.querySelectorAll(".export-options button").forEach(el => el.addEventListener("click", () => closeMenus(true)));
+    document.body.addEventListener("pointerdown", event => {
+      document.querySelectorAll(".language-menu[open],.export-menu[open]").forEach(el => { if (!el.contains(event.target)) el.open = false; });
+    });
     for (const fieldset of form.querySelectorAll("[data-person]")) {
       const person = fieldset.dataset.person, search = val(person + "-place");
       const list = fieldset.querySelector(".suggestions"), status = fieldset.querySelector(".place-status");
       const unknown = val(person + "-unknown"), time = val(person + "-time");
+      search.setAttribute("aria-describedby", person + "-place-status");
       val(person + "-date").max = maxDate;
       const close = () => { list.hidden = true; search.setAttribute("aria-expanded", "false"); search.removeAttribute("aria-activedescendant"); };
       unknown.addEventListener("change", () => { time.disabled = unknown.checked; time.required = !unknown.checked; });
+      for (const key of ["latitude", "longitude", "timezone"]) val(person + "-" + key).addEventListener("input", () => {
+        selected.delete(person); search.value = ""; status.textContent = "";
+      });
       let pending, timer, active = -1, results = [];
       function choose(index) {
         const item = results[index];
@@ -158,19 +184,130 @@
         timers.add(timer);
       });
     }
-    if (saved) {
-      for (const [name,value] of saved.fields || []) {
+    function restoreFields(snapshot) {
+      for (const [name,value] of snapshot.fields || []) {
         const el = val(name);
         if (el) { if (el.type === "checkbox") el.checked = value; else el.value = value; }
       }
-      for (const [key,value] of saved.selected || []) selected.set(key,value);
-      [...form.querySelectorAll(".coordinates")].forEach((el,i) => el.open = Boolean(saved.open?.[i]));
+      selected.clear();
+      for (const [key,value] of snapshot.selected || []) selected.set(key,value);
+      [...form.querySelectorAll(".coordinates")].forEach((el,i) => el.open = Boolean(snapshot.open?.[i]));
       form.querySelectorAll("[data-person]").forEach(el => {
         const p = el.dataset.person, u = val(p + "-unknown");
         val(p + "-time").disabled = u.checked; val(p + "-time").required = !u.checked;
+        const place = selected.get(p);
+        if (place) el.querySelector(".place-status").textContent = place.label + " · " + place.timezone;
       });
+      sample = Boolean(snapshot.sample); updateExample();
     }
+    if (saved) restoreFields(saved);
     function showError(message = t.error) { error.textContent = message; error.hidden = false; error.focus(); }
+    function clearFieldErrors() {
+      form.querySelectorAll(".field-error").forEach(el => el.remove());
+      form.querySelectorAll('[aria-invalid="true"]').forEach(el => {
+        el.removeAttribute("aria-invalid");
+        const ids = (el.getAttribute("aria-describedby") || "").split(" ").filter(id => id && !id.endsWith("-error"));
+        if (ids.length) el.setAttribute("aria-describedby", ids.join(" ")); else el.removeAttribute("aria-describedby");
+      });
+      error.hidden = true;
+    }
+    form.addEventListener("input", clearFieldErrors);
+    form.addEventListener("change", clearFieldErrors);
+    function flagField(input, message) {
+      const fieldError = node("p", message, "field-error"); fieldError.id = input.id + "-error";
+      input.setAttribute("aria-invalid", "true");
+      input.setAttribute("aria-describedby", [input.getAttribute("aria-describedby"), fieldError.id].filter(Boolean).join(" "));
+      const container = input.closest(".place-control");
+      (container || input).after(fieldError);
+      const details = input.closest("details"); if (details) details.open = true;
+    }
+    function validatePerson(index) {
+      clearFieldErrors();
+      const fieldset = people[index], person = fieldset.dataset.person, invalid = [];
+      for (const input of fieldset.querySelectorAll("input")) {
+        if (input.disabled || input.type === "checkbox") continue;
+        if (!input.validity.valid || ((input.required || input.name.endsWith("-timezone")) && !input.value.trim())) {
+          flagField(input, input.value.trim() ? t.error : t.required); invalid.push(input);
+        }
+      }
+      if (val(person + "-latitude").value === "" || val(person + "-longitude").value === "") {
+        const input = val(person + "-place"); flagField(input, t.locationRequired); invalid.push(input);
+      }
+      const zone = val(person + "-timezone");
+      if (zone.value.trim() && !invalid.includes(zone)) {
+        try { new Intl.DateTimeFormat("en", {timeZone:zone.value.trim()}); }
+        catch { flagField(zone, t.error); invalid.push(zone); }
+      }
+      if (!invalid.length) return true;
+      showStep(index, false); invalid[0].focus();
+      return false;
+    }
+    function buildReview() {
+      reviewPeople.replaceChildren();
+      people.forEach((fieldset, index) => {
+        const person = fieldset.dataset.person, card = node("article", null, "review-card");
+        const heading = node("div", null, "review-card-heading");
+        heading.append(node("h4", val(person + "-name").value.trim()));
+        const edit = node("button", t.edit, "text-button"); edit.type = "button";
+        edit.setAttribute("aria-label", t.edit + ": " + val(person + "-name").value.trim());
+        edit.addEventListener("click", () => showStep(index)); heading.append(edit); card.append(heading);
+        const dl = node("dl");
+        const entries = [[t.date, date(val(person + "-date").value)],
+          [t.time, val(person + "-unknown").checked ? t.unknown : val(person + "-time").value],
+          [t.place, selected.get(person)?.label || val(person + "-latitude").value + ", " + val(person + "-longitude").value],
+          [t.timezone, val(person + "-timezone").value]];
+        for (const [key,value] of entries) { const row = node("div"); row.append(node("dt", key), node("dd", value)); dl.append(row); }
+        card.append(dl); reviewPeople.append(card);
+      });
+      document.querySelector("#review-unknown").hidden = !people.some(el => val(el.dataset.person + "-unknown").checked);
+    }
+    function showStep(index, focus = true) {
+      step = Math.max(0, Math.min(index, people.length));
+      workspace.hidden = false; reading.hidden = true;
+      people.forEach((el, i) => el.hidden = i !== step);
+      form.querySelector(".people").hidden = step === people.length;
+      reviewStep.hidden = step !== people.length;
+      form.querySelector(".settings").hidden = step !== people.length;
+      document.querySelector("#flow-back").hidden = step === 0;
+      label.textContent = step === people.length ? t.calculate : t.continue;
+      form.querySelectorAll("[data-flow-step]").forEach((el, i) => {
+        if (i === step) el.setAttribute("aria-current", "step"); else el.removeAttribute("aria-current");
+        el.dataset.complete = String(i < step);
+      });
+      document.querySelector("#flow-count").textContent = number(step + 1) + " / " + number(people.length + 1);
+      if (step === people.length) buildReview();
+      if (focus) (step === people.length ? document.querySelector("#review-heading") : people[step].querySelector("legend")).focus();
+    }
+    form.querySelectorAll("[data-flow-step]").forEach(el => el.addEventListener("click", () => {
+      if (resultController) return;
+      const next = Number(el.dataset.flowStep);
+      for (let i = 0; i < next; i++) if (!validatePerson(i)) return;
+      clearFieldErrors(); showStep(next);
+    }));
+    document.querySelector("#flow-back").addEventListener("click", () => {
+      if (resultController) return;
+      clearFieldErrors(); showStep(step - 1);
+    });
+    document.querySelector("#same-place")?.addEventListener("click", () => {
+      for (const key of ["latitude","longitude","timezone","place"]) val("bride-" + key).value = val("groom-" + key).value;
+      const place = selected.get("groom");
+      if (place) selected.set("bride", place); else selected.delete("bride");
+      const fieldset = people[1];
+      fieldset.querySelector(".place-status").textContent = t.samePlace + " · " + val("bride-timezone").value;
+      if (!place) fieldset.querySelector(".coordinates").open = true;
+      clearFieldErrors(); invalidate();
+    });
+    exampleButton.addEventListener("click", () => {
+      if (exampleButton.hidden) return;
+      people.forEach((fieldset, i) => {
+        const person = fieldset.dataset.person;
+        const values = {name:i ? "Example B" : "Example A",date:i ? "1994-11-02" : "1992-03-14",time:"07:25",
+          latitude:"17.385",longitude:"78.4867",timezone:"Asia/Kolkata"};
+        for (const [key,value] of Object.entries(values)) val(person + "-" + key).value = value;
+      });
+      sample = true; invalidate(); clearFieldErrors(); showStep(people.length);
+    });
+    showStep(saved?.view === view ? saved.step || 0 : 0, false); updateExample();
     function personData(person) {
       const lat = val(person + "-latitude"), lon = val(person + "-longitude");
       if (lat.value === "" || lon.value === "") {
@@ -220,6 +357,12 @@
       if (warnings.length) card.append(node("p", t.review + ": " + warnings.join(", "), "badge review"));
       parent.append(card);
     }
+    function reportSection(title) {
+      const section = node("details", null, "report-section"), summary = node("summary");
+      summary.append(node("span", title)); section.append(summary);
+      const content = node("div", null, "report-section-content"); section.append(content); output.append(section);
+      return content;
+    }
     function renderMatch(data) {
       const scores = node("div", null, "scores"); output.append(scores);
       const order = view === "porutham" ? ["porutham","ashtakoota"] : ["ashtakoota","porutham"];
@@ -228,24 +371,25 @@
         const porutham = key === "porutham", title = porutham ? "Dasa Porutham" : "Ashtakoota";
         scoreCard(scores, title, porutham ? match.passed : match.total, porutham ? match.total : match.maximum,
           porutham ? match.essential_failures : match.blocking_doshas);
-        output.append(node("h3", title));
-        for (const item of (porutham ? match.poruthams : match.kootas)) factor(output, item, porutham);
-        sourceDetails(output, t.details, [match.verdict, ...Object.values(match.exceptions || {}).flat()]);
+        const section = reportSection(title);
+        for (const item of (porutham ? match.poruthams : match.kootas)) factor(section, item, porutham);
+        sourceDetails(section, t.details, [match.verdict, ...Object.values(match.exceptions || {}).flat()]);
       }
       if (data.doshas) {
-        output.append(node("h3", "Dosha"));
+        const section = reportSection("Dosha");
         const d = data.doshas;
-        sourceDetails(output, "Mangal", [d.mangal.summary, t.groom + ": " + d.mangal.groom.detail,
+        sourceDetails(section, "Mangal", [d.mangal.summary, t.groom + ": " + d.mangal.groom.detail,
           ...d.mangal.groom.cancellations, t.bride + ": " + d.mangal.bride.detail, ...d.mangal.bride.cancellations]);
         for (const key of ["kaal_sarp","sade_sati"]) {
-          if (d[key]) sourceDetails(output, key === "kaal_sarp" ? "Kaal Sarp" : "Sade Sati",
+          if (d[key]) sourceDetails(section, key === "kaal_sarp" ? "Kaal Sarp" : "Sade Sati",
             [t.groom + ": " + d[key].groom.detail, t.bride + ": " + d[key].bride.detail]);
         }
       }
-      if (data.full_charts) for (const c of Object.values(data.full_charts)) renderChart(c);
+      if (data.full_charts) for (const c of Object.values(data.full_charts)) renderChart(c, reportSection(c.name + " · " + t.chart));
       if (data.dasha) sourceDetails(output, "Vimshottari", [data.dasha.groom, data.dasha.bride]);
     }
-    function renderChart(chart) {
+    function renderChart(chart, parent = output) {
+      const output = parent;
       output.append(node("h3", chart.name + " · " + t.chart));
       const wrapper = node("div", null, "table-scroll"), table = node("table"), thead = node("thead"), header = node("tr");
       for (const heading of ["Graha","Rashi","°","Nakshatra","Pada","Navamsa","House"]) {
@@ -272,6 +416,7 @@
     }
     function renderRecord(data, body) {
       output.replaceChildren(); exportError.hidden = true;
+      if (sample) output.append(node("p", t.sampleNotice, "notice"));
       if (data.accuracy_warning) {
         output.append(node("p", t.unknown + " · " + t.review, "notice"));
         sourceDetails(output,t.details,[data.accuracy_warning]);
@@ -280,7 +425,7 @@
       shareSummary = [...output.querySelectorAll(".score-card")].map(card =>
         card.querySelector(".score-label").textContent + " " + card.querySelector(".score-value").textContent.replace(/\s+/g, " ").trim()
       ).join(" · ") || document.title;
-      reading.hidden = false;
+      reading.hidden = false; workspace.hidden = true;
       toggleDetails.textContent = t.expandAll; toggleDetails.setAttribute("aria-expanded", "false");
       document.querySelector("#result-heading").textContent = view === "chart" ? body.name : body.groom.name + " & " + body.bride.name;
     }
@@ -319,7 +464,7 @@
     });
     document.querySelector("#download-json").addEventListener("click", () => {
       if (!lastReport || !lastRequest) return;
-      const file = {schemaVersion:1, application:"Astro", view, locale, calculatedAt, ayanamsa:lastAyanamsa,
+      const file = {schemaVersion:1, application:"Astro", view, locale, calculatedAt, ayanamsa:lastAyanamsa, sample,
         inputs:lastRequest, report:lastReport};
       saveBlob(new Blob([JSON.stringify(file,null,2)], {type:"application/json"}), "astro-" + (view === "chart" ? "chart" : "match") + ".json");
     });
@@ -329,13 +474,25 @@
       toggleDetails.textContent = open ? t.collapseAll : t.expandAll;
       toggleDetails.setAttribute("aria-expanded", String(open));
     });
+    output.addEventListener("toggle", () => {
+      const items = [...output.querySelectorAll("details")], allOpen = items.length > 0 && items.every(el => el.open);
+      toggleDetails.textContent = allOpen ? t.collapseAll : t.expandAll;
+      toggleDetails.setAttribute("aria-expanded", String(allOpen));
+    }, true);
     if (saved?.report && saved?.request && saved.view === view) {
       lastReport = saved.report; lastRequest = saved.request; lastAyanamsa = saved.ayanamsa; calculatedAt = saved.calculatedAt;
       renderRecord(lastReport, lastRequest);
+      if (!saved.showingReport) showStep(step, false);
     }
     form.addEventListener("submit", async event => {
-      event.preventDefault(); error.hidden = true; invalidate();
-      if (!form.reportValidity()) return;
+      event.preventDefault();
+      if (resultController) return;
+      if (step < people.length) {
+        if (validatePerson(step)) showStep(step + 1);
+        return;
+      }
+      for (let i = 0; i < people.length; i++) if (!validatePerson(i)) return;
+      error.hidden = true; invalidate();
       let body;
       try {
         const groom = personData("groom");
@@ -359,18 +516,33 @@
         if (version === generation && (!own.signal.aborted || own.signal.reason === "timeout")) showError();
       } finally {
         clearTimeout(timeout); controllers.delete(own);
-        if (version === generation) { button.disabled = false; label.textContent = t.calculate; form.removeAttribute("aria-busy"); resultController = null; }
+        if (version === generation && resultController === own) { button.disabled = false; label.textContent = step === people.length ? t.calculate : t.continue; form.removeAttribute("aria-busy"); resultController = null; }
       }
     });
     form.addEventListener("reset", () => {
+      const snapshot = capture();
       invalidate(); cleanup(); selected.clear(); output.replaceChildren(); error.hidden = true; exportError.hidden = true;
+      clearFieldErrors(); sample = false;
       form.querySelectorAll(".place-status").forEach(el => el.textContent = "");
       form.querySelectorAll(".coordinates,.settings").forEach(el => el.open = false);
       form.querySelectorAll(".suggestions").forEach(el => el.hidden = true);
       form.querySelectorAll('[role="combobox"]').forEach(el => { el.setAttribute("aria-expanded", "false"); el.removeAttribute("aria-activedescendant"); });
-      queueMicrotask(() => { form.querySelectorAll('[type="time"]').forEach(el => {el.disabled = false; el.required = true;}); });
+      queueMicrotask(() => {
+        form.querySelectorAll('[type="time"]').forEach(el => {el.disabled = false; el.required = true;});
+        button.disabled = false; form.removeAttribute("aria-busy"); resultController = null;
+        showStep(0); updateExample();
+        resetSnapshot = snapshot; resetStatus.hidden = false;
+        resetTimer = setTimeout(forgetUndo, 15000); timers.add(resetTimer);
+      });
     });
-    document.querySelector("#edit").addEventListener("click", () => { val("groom-name").focus(); form.scrollIntoView({block:"start",behavior:matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"}); });
+    document.querySelector("#undo-reset").addEventListener("click", () => {
+      if (!resetSnapshot) return;
+      const snapshot = resetSnapshot; forgetUndo(); restoreFields(snapshot);
+      lastReport = snapshot.report; lastRequest = snapshot.request; lastAyanamsa = snapshot.ayanamsa; calculatedAt = snapshot.calculatedAt;
+      showStep(snapshot.step);
+      if (lastReport && lastRequest && snapshot.showingReport) { renderRecord(lastReport, lastRequest); reading.focus(); }
+    });
+    document.querySelector("#edit").addEventListener("click", () => showStep(people.length));
     let printOpen = [];
     const beforePrint = () => {
       printOpen = [...reading.querySelectorAll("details")].map(el => [el,el.open]);
@@ -383,7 +555,7 @@
       if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
       event.preventDefault(); closeMenus(); navigate(link.href,true);
     }));
-    document.body.addEventListener("keydown", event => { if (event.key === "Escape") closeMenus(); });
+    document.body.addEventListener("keydown", event => { if (event.key === "Escape") closeMenus(true); });
   }
   async function navigate(url,push) {
     const nav = ++navigation;

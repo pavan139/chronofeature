@@ -39,6 +39,24 @@ def test_invalid_locale_and_route_return_real_404():
     assert client.get("/zz/").status_code == 404
     assert client.get("/en/not-a-page/").status_code == 404
 
+@pytest.mark.parametrize("route,steps", [("", 3), ("porutham/", 3), ("birth-chart/", 2)])
+def test_guided_controls_are_server_rendered(route, steps):
+    html = client.get("/en/" + route).text
+    assert html.count('data-flow-step="') == steps
+    assert 'id="review-step"' in html and 'id="review-people"' in html
+    assert 'id="try-example"' in html and 'id="undo-reset"' in html
+    assert 'aria-current="step"' in html
+    assert '/static/flow.css' in html
+    assert 'id="download-pdf"' in html and 'class="export-menu"' in html
+
+def test_guided_styles_keep_zoom_and_respect_motion_preferences():
+    css = client.get("/static/flow.css")
+    assert css.status_code == 200
+    assert "prefers-reduced-motion: no-preference" in css.text
+    assert "font-variant-numeric: tabular-nums" in css.text
+    assert "transition: all" not in css.text
+    assert "maximum-scale" not in client.get("/en/").text
+
 def test_report_uses_engine_and_does_not_cache():
     r = client.post("/match/full", json=MATCH)
     assert r.status_code == 200, r.text

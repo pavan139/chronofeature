@@ -15,7 +15,10 @@ uvicorn gunamilan.api:app --reload
 Open http://127.0.0.1:8000/en/. Coordinate-based charts and matching work without the place database. Place autocomplete needs the GeoNames build. The source files now live in the standard `gunamilan/` package. Original arithmetic and lookup tables are retained.
 
 ## Interface
-- Two-person compatibility form with Ashtakoota and Dasa Porutham shown separately.
+- Guided compatibility flow: one person at a time, review both profiles, then explicitly calculate. Ashtakoota and Dasa Porutham remain separate.
+- Same-birthplace reuse, field-specific errors with focus handling, editable review cards and a labelled synthetic example that never replaces entered details.
+- Clear details supports a 15-second undo window in page memory. New input discards the snapshot immediately.
+- Summary-first reports with grouped technical disclosures and PDF as the primary export. Print, share and JSON remain available under more options.
 - Natal chart, Navamsa, Vimshottari periods, doshas and explicit exceptions.
 - Responsive ink-and-copper theme, session-only dark mode, keyboard place selection, visible focus and reduced-motion support.
 - Privacy-safe Web Share and link-copy actions. Shared URLs never contain names, dates, places or calculation inputs.
@@ -30,6 +33,8 @@ Open http://127.0.0.1:8000/en/. Coordinate-based charts and matching work withou
 - No account, checkout or paid-report gate has been implemented. `/match/full` is accessible like the original endpoint. Separate free/full endpoints do not constitute payment enforcement.
 
 ## Languages
+UI research, source links and explicit tradeoffs are documented in [the research record](docs/ui-research.md). See [the frontend checklist](docs/frontend-checklist.md) for bounded AI-assisted implementation and acceptance cases.
+
 Interface messages have explicit entries in each of 23 catalogs:
 English, Hindi, Tamil, Telugu, Kannada, Malayalam, Marathi, Gujarati, Bengali, Punjabi, Odia, Assamese, Urdu, Nepali, Sanskrit, Konkani, Maithili, Dogri, Sindhi, Kashmiri, Bodo, Manipuri and Santali.
 

@@ -24,6 +24,7 @@
 <link rel="apple-touch-icon" href="/static/favicon.svg">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="stylesheet" href="/static/app.css">
+<link rel="stylesheet" href="/static/flow.css">
 <script src="/static/app.js" defer></script>
 <script type="application/ld+json" nonce="{{ nonce }}">{{ schema|tojson }}</script>
 </head>
@@ -62,12 +63,17 @@
   </section>
   <div class="workspace">
     <section class="input-panel" aria-labelledby="input-heading">
-      <div class="section-title"><span class="step">01</span><h2 id="input-heading">{{ t.details }}</h2><span class="small-word">Swiss Ephemeris</span></div>
-      <form id="birth-form" autocomplete="off">
-        <div class="people {{ 'single' if view=='chart' else '' }}">
+      <div class="section-title"><h2 id="input-heading">{{ t.details }}</h2><span class="flow-count" id="flow-count" aria-live="polite"></span></div>
+      <form id="birth-form" autocomplete="off" novalidate>
+        <ol class="flow-progress" aria-label="{{ t.details }}">
+          {% for person in (['groom'] if view=='chart' else ['groom','bride']) %}<li><button type="button" data-flow-step="{{ loop.index0 }}" aria-controls="step-{{ person }}" {% if loop.first %}aria-current="step"{% endif %}><span class="step-number" aria-hidden="true">{{ loop.index }}</span><span>{{ t.chart if view=='chart' else t[person] }}</span></button></li>{% endfor %}
+          <li><button type="button" data-flow-step="{{ 1 if view=='chart' else 2 }}" aria-controls="review-step"><span class="step-number" aria-hidden="true">{{ 2 if view=='chart' else 3 }}</span><span>{{ t.reviewDetails }}</span></button></li>
+        </ol>
+        <p id="sample-notice" class="notice sample-notice" hidden>{{ t.sampleNotice }}</p>
+        <div class="people single">
         {% for person in (['groom'] if view=='chart' else ['groom','bride']) %}
-          <fieldset class="person" data-person="{{ person }}">
-            <legend><span class="person-symbol" aria-hidden="true">{{ '☉' if person=='groom' else '☾' }}</span>{{ t.chart if view=='chart' else t[person] }}</legend>
+          <fieldset class="person" id="step-{{ person }}" data-person="{{ person }}" {% if not loop.first %}hidden{% endif %}>
+            <legend tabindex="-1"><span class="person-symbol" aria-hidden="true">{{ '☉' if person=='groom' else '☾' }}</span>{{ t.chart if view=='chart' else t[person] }}</legend>
             <label for="{{ person }}-name">{{ t.name }}</label>
             <input id="{{ person }}-name" name="{{ person }}-name" maxlength="80" required autocomplete="off" dir="auto">
             <div class="date-time">
@@ -76,11 +82,12 @@
             </div>
             <label class="check"><input type="checkbox" name="{{ person }}-unknown">{{ t.unknown }}</label>
             <label for="{{ person }}-place">{{ t.place }}</label>
+            {% if person=='bride' %}<button id="same-place" type="button" class="text-button same-place">{{ t.samePlace }}</button>{% endif %}
             <div class="place-control">
               <input id="{{ person }}-place" name="{{ person }}-place" placeholder="{{ t.search }}" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="{{ person }}-places" autocomplete="off" spellcheck="false" dir="auto">
               <ul id="{{ person }}-places" class="suggestions" role="listbox" hidden></ul>
             </div>
-            <p class="place-status" aria-live="polite"></p>
+            <p class="place-status" id="{{ person }}-place-status" aria-live="polite"></p>
             <details class="coordinates">
               <summary>{{ t.manual }}</summary>
               <div class="date-time">
@@ -93,15 +100,21 @@
           </fieldset>
         {% endfor %}
         </div>
+        <section id="review-step" class="review-step" aria-labelledby="review-heading" hidden>
+          <h3 id="review-heading" tabindex="-1">{{ t.reviewDetails }}</h3>
+          <div id="review-people" class="review-people"></div>
+          <p id="review-unknown" class="notice" hidden>{{ t.unknown }} · {{ t.review }}</p>
+        </section>
         <div class="form-base">
-          <details class="settings">
+          <details class="settings" hidden>
             <summary>{{ t.settings }}</summary>
             <label for="ayanamsa">Ayanamsa</label>
             <select name="ayanamsa" id="ayanamsa"><option value="lahiri">Lahiri</option><option value="raman">Raman</option><option value="krishnamurti">Krishnamurti</option><option value="fagan_bradley">Fagan–Bradley</option></select>
           </details>
           <p class="form-error" id="form-error" role="alert" tabindex="-1" hidden></p>
-          <button class="primary" type="submit"><span class="submit-label">{{ t.calculate }}</span><span aria-hidden="true" class="arrow">↗</span></button>
+          <div class="flow-actions"><button id="flow-back" type="button" class="secondary" hidden>{{ t.back }}</button><button class="primary" type="submit"><span class="submit-label">{{ t.continue }}</span><span aria-hidden="true" class="arrow">→</span></button></div>
           <div class="form-foot"><span>{{ t.privacy }}</span><button type="reset" class="text-button">{{ t.reset }}</button></div>
+          <div class="sample-action"><button type="button" id="try-example" class="text-button">{{ t.tryExample }}</button></div>
         </div>
       </form>
       <noscript><p class="notice" lang="en">JavaScript is required to calculate a personal chart. These public pages remain readable without it.</p></noscript>
@@ -115,12 +128,12 @@
       <a href="#method" class="method-link">{{ t.method }} <span aria-hidden="true">↘</span></a>
     </aside>
   </div>
+  <div id="reset-status" class="reset-status" role="status" hidden><span>{{ t.cleared }}</span><button type="button" id="undo-reset" class="secondary">{{ t.undo }}</button></div>
   <section id="reading" class="reading" aria-labelledby="result-heading" tabindex="-1" hidden>
-    <div class="report-top"><div><div class="eyebrow">ASTRO / {{ t.result }}</div><h2 id="result-heading">{{ t.result }}</h2></div><div class="report-actions"><button id="share-result" class="secondary">{{ t.share }}</button><button id="edit" class="secondary">{{ t.edit }}</button><button id="print" class="primary">{{ t.print }}</button></div></div>
+    <div class="report-top"><div><div class="eyebrow">ASTRO / {{ t.result }}</div><h2 id="result-heading">{{ t.result }}</h2></div><div class="report-actions"><button id="edit" class="secondary">{{ t.edit }}</button><button id="download-pdf" type="button" class="primary">{{ t.downloadPdf }}</button></div></div>
     <div class="report-tools" role="group" aria-label="{{ t.result }}">
-      <button id="download-pdf" type="button" class="primary">{{ t.downloadPdf }}</button>
-      <button id="download-json" type="button" class="secondary">{{ t.downloadJson }}</button>
       <button id="toggle-details" type="button" class="secondary" aria-expanded="false" aria-controls="report-content">{{ t.expandAll }}</button>
+      <details class="export-menu"><summary class="secondary">{{ t.more }}</summary><div class="export-options"><button id="share-result" type="button" class="secondary">{{ t.share }}</button><button id="print" type="button" class="secondary">{{ t.print }}</button><button id="download-json" type="button" class="secondary">{{ t.downloadJson }}</button></div></details>
     </div>
     <p id="export-error" class="form-error" role="alert" hidden></p>
     <div id="report-content"></div>
@@ -143,12 +156,12 @@
       <p>With an unknown time the engine uses local noon as an approximation. It omits the ascendant and house numbers. The Moon may change sign, nakshatra or pada during the day. Scores can therefore change. A score is not a probability of marital success, and these traditional rules are not evidence of health, fertility or future events.</p>
       <h3>Language and data</h3>
       <p>The interface is available in English and 22 Indian languages. Translations are initial drafts pending native-speaker review. Engine rule explanations and some proper names remain in their original language, identified explicitly in the report. No third-party translation service receives birth details. Place search needs the GeoNames database built by the repository's setup script. Coordinate entry works without it.</p>
-      <p>We store no birth details in a database, cookies, browser storage or share links. Changing language keeps the form in this page's memory. Closing or refreshing the page clears the form.</p>
+      <p>We store no birth details in a database, cookies, browser storage or share links. Changing language keeps the form in this page's memory. Clear details offers undo for 15 seconds in page memory, discarded when you enter new details. Closing or refreshing the page clears the form.</p>
       </div>
     </details>
   </section>
 </main>
 <footer><a class="brand" href="/{{ lang }}/">astro<span class="brand-dot">.</span></a><p>{{ t.privacy }}</p><a href="https://www.geonames.org/" rel="noreferrer">GeoNames · CC BY 4.0</a></footer>
 <datalist id="timezones"><option value="Asia/Kolkata"><option value="Asia/Kathmandu"><option value="Asia/Dhaka"><option value="Asia/Colombo"><option value="Asia/Dubai"><option value="Europe/London"><option value="America/New_York"><option value="America/Los_Angeles"><option value="Australia/Sydney"><option value="UTC"></datalist>
-<div id="messages" hidden>{% for key in ['error','unavailable','loading','calculate','result','score','passed','review','details','unknown','note','groom','bride','chart','empty','share','copy','copied','install','theme','downloadPdf','downloadJson','expandAll','collapseAll'] %}<span data-key="{{ key }}">{{ t[key] }}</span>{% endfor %}</div>
+<div id="messages" hidden>{% for key in ['error','unavailable','loading','calculate','result','score','passed','review','details','unknown','note','groom','bride','chart','empty','share','copy','copied','install','theme','downloadPdf','downloadJson','expandAll','collapseAll','continue','back','reviewDetails','samePlace','tryExample','sampleNotice','required','locationRequired','edit','date','time','place','timezone','more'] %}<span data-key="{{ key }}">{{ t[key] }}</span>{% endfor %}</div>
 </body></html>

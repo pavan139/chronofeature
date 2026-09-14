@@ -45,5 +45,16 @@
   "downloadPdf": "Download PDF",
   "downloadJson": "Download JSON",
   "expandAll": "Expand all",
-  "collapseAll": "Collapse all"
+  "collapseAll": "Collapse all",
+  "continue": "Continue",
+  "back": "Back",
+  "reviewDetails": "Review details",
+  "samePlace": "Use the same birthplace",
+  "tryExample": "Try an example",
+  "sampleNotice": "Example data. Not your personal reading.",
+  "required": "This field is required.",
+  "locationRequired": "Select a birthplace from the list, or enter coordinates.",
+  "cleared": "Details cleared. Undo is available for 15 seconds.",
+  "undo": "Undo",
+  "more": "More options"
 }

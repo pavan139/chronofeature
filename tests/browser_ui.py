@@ -10,7 +10,9 @@ with sync_playwright() as playwright:
     browser = playwright.chromium.launch()
     page = browser.new_page(viewport={"width": 1440, "height": 1100})
     errors = []
+    calculations = []
     page.on("pageerror", lambda error: errors.append(str(error)))
+    page.on("request", lambda request: calculations.append(request.url) if request.method == "POST" and "/match/full" in request.url else None)
     page.goto("http://127.0.0.1:8000/en/")
     page.screenshot(path=str(ARTIFACTS / "desktop.png"), full_page=True)
     page.locator("#theme-toggle").click()
@@ -18,24 +20,44 @@ with sync_playwright() as playwright:
     assert page.evaluate("document.documentElement.dataset.theme") == "dark"
     page.screenshot(path=str(ARTIFACTS / "desktop-dark.png"), full_page=True)
     page.locator("#theme-toggle").click()
+    # Future steps cannot bypass validation, and the first invalid input gets focus.
+    page.locator('[data-flow-step="2"]').click()
+    assert page.locator("#groom-name").get_attribute("aria-invalid") == "true"
+    assert page.locator("#groom-name").evaluate("e => e === document.activeElement")
+    assert "groom-name-error" in page.locator("#groom-name").get_attribute("aria-describedby")
+    page.screenshot(path=str(ARTIFACTS / "flow-error.png"))
     for person, name, day in [("groom", "Test A", "1992-03-14"), ("bride", "Test B", "1994-11-02")]:
         page.locator("#" + person + "-name").fill(name)
         page.locator("#" + person + "-date").fill(day)
         page.locator("#" + person + "-time").fill("07:25")
-        page.locator('[data-person="' + person + '"] .coordinates').evaluate("(e) => e.open = true")
-        page.locator("#" + person + "-lat").fill("17.385")
-        page.locator("#" + person + "-lon").fill("78.4867")
+        if person == "groom":
+            page.locator('[data-person="groom"] .coordinates').evaluate("(e) => e.open = true")
+            page.locator("#groom-lat").fill("17.385")
+            page.locator("#groom-lon").fill("78.4867")
+        else:
+            page.locator("#same-place").click()
+            assert page.locator("#bride-lat").input_value() == "17.385"
+            assert page.locator("#bride-tz").input_value() == "Asia/Kolkata"
+        page.locator('#birth-form button[type="submit"]').click()
+    assert not calculations, "Review must not silently calculate or submit birth details"
+    assert page.locator("#review-step").is_visible()
+    assert page.locator(".review-card").count() == 2
+    page.screenshot(path=str(ARTIFACTS / "flow-review.png"))
     page.locator(".language-menu summary").click()
     page.locator('.locale-link[lang="hi"]').click()
     page.wait_for_url("**/hi/")
     assert page.locator("#groom-name").input_value() == "Test A"
     assert page.locator("#bride-date").input_value() == "1994-11-02"
+    assert page.locator("#review-step").is_visible(), "Locale switching must preserve the current step"
     page.locator('#birth-form button[type="submit"]').click()
     page.locator("#reading").wait_for(state="visible")
     assert page.locator(".score-card").count() == 2
     assert page.locator("#reading table").count() == 2
     assert not page.locator("#form-error").is_visible()
+    assert page.locator(".workspace").is_hidden()
+    assert page.locator(".report-section[open]").count() == 0
     page.evaluate("navigator.share = data => { window.__shared = data; return Promise.resolve(); }")
+    page.locator(".export-menu summary").click()
     page.locator("#share-result").click()
     shared = page.evaluate("window.__shared")
     assert "Test A" not in shared["text"] and "Test B" not in shared["text"]
@@ -54,6 +76,7 @@ with sync_playwright() as playwright:
     assert page.locator("#report-content details:not([open])").count() == 0
     page.locator("#toggle-details").click()
     assert page.locator("#report-content details[open]").count() == 0
+    page.locator(".export-menu summary").click()
     with page.expect_download() as download:
         page.locator("#download-json").click()
     json_path = ARTIFACTS / "download-match.json"
@@ -91,25 +114,51 @@ with sync_playwright() as playwright:
     page.locator("#groom-lat").fill("17.385")
     page.locator("#groom-lon").fill("78.4867")
     page.locator('#birth-form button[type="submit"]').click()
+    assert page.locator("#review-unknown").is_visible()
+    page.locator('#birth-form button[type="submit"]').click()
     page.locator("#reading").wait_for(state="visible")
     assert page.locator("#reading .notice").count() == 1
     with page.expect_download(timeout=60000) as download:
         page.locator("#download-pdf").click()
     assert download.value.suggested_filename == "astro-chart.pdf"
     download.value.save_as(str(ARTIFACTS / "download-chart-en.pdf"))
+    page.locator("#edit").click()
+    page.locator(".review-card button").click()
     page.locator("#groom-name").fill("Changed input")
     assert page.locator("#reading").is_hidden()
     page.locator(".language-menu summary").click()
     page.locator('.locale-link[lang="hi"]').click()
     page.wait_for_url("**/hi/birth-chart/")
     assert page.locator("#reading").is_hidden()
-    for locale in ["en", "hi", "ta", "te", "ur", "sat", "mni"]:
+    # Clear is reversible briefly, and a new edit discards the undo snapshot.
+    page.locator('button[type="reset"]').click()
+    assert page.locator("#groom-name").input_value() == ""
+    page.locator("#undo-reset").click()
+    assert page.locator("#groom-name").input_value() == "Changed input"
+    assert page.locator('input[name="groom-unknown"]').is_checked()
+    page.locator('button[type="reset"]').click()
+    page.locator("#groom-name").fill("New person")
+    assert page.locator("#reset-status").is_hidden()
+    # Every catalog must support the complete sample -> review -> result flow on mobile.
+    for locale in sorted(path.stem for path in Path("gunamilan/locales").glob("*.json")):
         page.set_viewport_size({"width": 390, "height": 844})
         page.goto("http://127.0.0.1:8000/" + locale + "/")
         assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth"), locale
         assert page.locator("h1").is_visible()
         if locale in ["ta", "ur"]:
             page.screenshot(path=str(ARTIFACTS / ("mobile-" + locale + ".png")), full_page=True)
+        page.locator("#try-example").click()
+        assert page.locator("#sample-notice").is_visible()
+        assert page.locator("#review-step").is_visible()
+        assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth"), locale + " review"
+        page.locator('#birth-form button[type="submit"]').click()
+        page.locator("#reading").wait_for(state="visible")
+        assert page.locator("#reading .notice").is_visible()
+        assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth"), locale + " report"
+        if locale == "en":
+            page.screenshot(path=str(ARTIFACTS / "flow-mobile.png"))
+        if locale == "ta":
+            page.locator("#reading").screenshot(path=str(ARTIFACTS / "flow-result.png"))
     page.set_viewport_size({"width": 1440, "height": 1100})
     page.goto("http://127.0.0.1:8000/en/")
     page.locator("#groom-place").fill("Hyder")
@@ -118,6 +167,15 @@ with sync_playwright() as playwright:
     page.locator("#groom-place").press("Enter")
     assert page.locator("#groom-lat").input_value()
     assert page.locator("#groom-places").is_hidden()
+    page.locator("#groom-name").fill("Place search")
+    page.locator("#groom-date").fill("1992-03-14")
+    page.locator("#groom-time").fill("07:25")
+    page.locator('[data-person="groom"] .coordinates summary').click()
+    page.locator("#groom-tz").fill("Invalid/Timezone")
+    page.locator('#birth-form button[type="submit"]').click()
+    assert page.locator("#groom-tz").get_attribute("aria-invalid") == "true"
+    page.locator("#groom-tz").fill("Asia/Kolkata")
+    page.locator('#birth-form button[type="submit"]').click()
     # Search failure must leave manual coordinates usable.
     page.route("**/places?*", lambda route: route.fulfill(status=503,body='{"detail":"unavailable"}',content_type="application/json"))
     page.locator("#bride-place").fill("missing")
@@ -125,4 +183,4 @@ with sync_playwright() as playwright:
     assert page.locator("#bride-lat").is_visible()
     assert not errors, errors
     browser.close()
-print("Browser flows passed: real reports, PDF/JSON downloads, export recovery, report-preserving locale handoff, expand/collapse, unknown time, mobile overflow, RTL, keyboard places.")
+print("Browser flows passed: guided steps, validation focus, review before submission, same birthplace, reset/undo, 23-language mobile sample flows, real reports, PDF/JSON downloads, export recovery, locale handoff, progressive disclosure, unknown time, RTL, keyboard places.")
