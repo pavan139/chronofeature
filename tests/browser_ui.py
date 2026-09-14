@@ -60,7 +60,7 @@ with sync_playwright() as playwright:
     # Search failure must leave manual coordinates usable.
     page.route("**/places?*", lambda route: route.fulfill(status=503,body='{"detail":"unavailable"}',content_type="application/json"))
     page.locator("#bride-place").fill("missing")
-    page.wait_for_function("""document.querySelector('[data-person="bride"] .coordinates').open""")
+    page.locator("#bride-lat").wait_for(state="visible")
     assert page.locator("#bride-lat").is_visible()
     assert not errors, errors
     browser.close()

@@ -11,6 +11,7 @@ from xml.sax.saxutils import escape
 from fastapi import HTTPException, Request
 from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.gzip import GZipMiddleware
 from fastapi.templating import Jinja2Templates
 
 ROOT = Path(__file__).parent
@@ -36,6 +37,7 @@ def index_locales():
     return set(os.getenv("INDEX_LOCALES", "en").split(",")) & set(catalogs())
 
 def install_web(app):
+    app.add_middleware(GZipMiddleware, minimum_size=1000)
     app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
 
     @app.middleware("http")
