@@ -64,7 +64,7 @@ python -m playwright install --with-deps chromium
 python tests/browser_ui.py
 ```
 
-GitHub Actions builds the real GeoNames database, runs the original engine tests plus HTTP/locale regressions, and exercises calculation, unknown time, language handoff, mobile overflow, RTL, keyboard place search and its failure state in Chromium. Screenshot artifacts use fictional test names. CI also builds the Docker image and runs Lighthouse against an indexable loopback instance. Its synthetic scores are not production or field measurements.
+GitHub Actions builds the real GeoNames database, runs the original engine tests plus HTTP/locale regressions, and exercises calculation, unknown time, language handoff, mobile overflow, RTL, keyboard place search and its failure state in Chromium. Screenshot artifacts use fictional test names. CI also builds the Docker image and runs three sequential Lighthouse audits against an indexable loopback instance, reporting every score and gating the median at 90 for performance, accessibility and SEO. This accounts for shared-runner variance using [Google's guidance](https://developers.google.com/web/tools/lighthouse/variability). Its synthetic scores are not production or field measurements.
 
 ## Deployment
 The included Dockerfile runs FastAPI and serves static assets in one service.

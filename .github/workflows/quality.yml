@@ -3,6 +3,9 @@ on:
   push:
     branches: [main, feat/multilingual-frontend]
   workflow_dispatch:
+concurrency:
+  group: application-quality-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
@@ -48,19 +51,10 @@ jobs:
         run: |
           INDEXABLE=true INDEX_LOCALES=en SITE_URL=http://127.0.0.1:8001 uvicorn gunamilan.api:app --host 127.0.0.1 --port 8001 > /tmp/astro-audit.log 2>&1 &
           python -c "import time; time.sleep(2)"
-          npx --yes lighthouse@13.4.1 http://127.0.0.1:8001/en/ --chrome-flags="--headless --no-sandbox" --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=test-results/lighthouse.json --quiet
-          python - <<'PY'
-          import json
-          report = json.load(open("test-results/lighthouse.json"))
-          scores = {name: int(value["score"] * 100) for name, value in report["categories"].items()}
-          print("ASTRO_LIGHTHOUSE=" + json.dumps(scores))
-          for key in ["largest-contentful-paint", "cumulative-layout-shift", "total-blocking-time"]:
-              print(key + ": " + report["audits"][key]["displayValue"])
-          failed = [{"id": k, "title": v["title"], "description": v.get("description", "")}
-                    for k, v in report["audits"].items() if v.get("score") == 0]
-          print("ASTRO_AUDIT_FAILURES=" + json.dumps(failed))
-          assert scores["performance"] >= 90 and scores["accessibility"] >= 90 and scores["seo"] >= 90, scores
-          PY
+          for audit in 1 2 3; do
+            npx --yes lighthouse@13.4.1 http://127.0.0.1:8001/en/ --chrome-flags="--headless --no-sandbox" --only-categories=performance,accessibility,best-practices,seo --output=json --output-path="test-results/lighthouse-$audit.json" --quiet
+          done
+          python scripts/check_lighthouse.py
       - name: Screenshot preview
         if: always()
         run: |
