@@ -24,7 +24,7 @@ Reviewed all original files: ephemeris.py, doshas.py, geocode.py, build_places.p
 8. **Fonts:** the interface uses local/system font fallbacks. Devices without an appropriate script font may need a self-hosted Noto font bundle. CI screenshots do not certify glyph coverage on every device.
 
 ## Validation scope
-The workflow performs engine/HTTP regressions and real Chromium flows, with screenshot artifacts. No measured Lighthouse score, independently verified astrology certification, guaranteed SEO result or public deployment is claimed. Check the PR's CI status for actual execution outcomes.
+The workflow performs engine/HTTP regressions and real Chromium flows, with screenshot artifacts. Lighthouse audits are synthetic measurements of a local CI instance, not field Core Web Vitals. No independently verified astrology certification, guaranteed SEO result or public deployment is claimed. Check the PR's CI status for actual execution outcomes.
 
 ## SEO and publication
 Indexing is off by default. Set SITE_URL and INDEXABLE only for a deliberate public deployment, then INDEX_LOCALES only for reviewed languages. A private GitHub repository controls source access, not visitors to a web server. Public indexing requires a publicly accessible site.

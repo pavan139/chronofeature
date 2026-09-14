@@ -29,7 +29,9 @@ jobs:
       - name: Engine and HTTP tests
         run: python -m pytest -q
       - name: Verify container build
-        run: docker build -t astro-ci .
+        run: |
+          docker build -t astro-ci .
+          docker run --rm astro-ci python -c "from gunamilan.api import app; from gunamilan.ephemeris import BirthData, cast_chart; import datetime as d; print(cast_chart(BirthData('CI',d.date(2000,1,1),d.time(12),17.385,78.4867)).moon.rashi_name)"
       - name: Install browser
         run: python -m playwright install --with-deps chromium
       - name: Install script fonts

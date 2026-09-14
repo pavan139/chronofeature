@@ -10,3 +10,6 @@
 @media print{body{background:white;color:#000}header,.intro,.workspace,.method,footer,.report-actions,.skip{display:none!important}main{max-width:none;padding:0}.reading{display:block!important;border:0;padding:0;margin:0}.reading[hidden]{display:none!important}.score-card,.chart-card{break-inside:avoid;background:white}.factor{break-inside:avoid}.factor-content{display:block!important}.table-scroll{overflow:visible}.report-top h2{font-size:1.5rem}.badge{background:none;border:1px solid #999}.report-note{font-size:.8rem}a{color:#000}.factor summary:after{display:none}}
 
 .dasha-timeline{padding-inline-start:1.4rem;border-inline-start:2px solid var(--copper-light);margin:1rem 0 1.5rem .7rem}.dasha-timeline li{padding:.5rem 0;color:var(--muted);font-size:.9rem;line-height:1.6}
+
+.brand{direction:ltr}
+@media(max-width:780px){.main-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));height:auto;overflow:visible;white-space:normal;gap:.75rem;text-align:center}.main-nav a{overflow-wrap:anywhere;line-height:1.6;padding:.5rem .1rem}.main-nav a[aria-current=page]:after{bottom:0}}

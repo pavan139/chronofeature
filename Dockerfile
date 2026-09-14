@@ -1,12 +1,13 @@
 FROM python:3.12-slim AS builder
 WORKDIR /build
-RUN apt-get update && apt-get install -y --no-install-recommends gcc libc6-dev && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential && rm -rf /var/lib/apt/lists/*
 COPY . .
 RUN pip wheel --no-cache-dir --wheel-dir /wheels .
 
 FROM python:3.12-slim
 WORKDIR /app
 COPY --from=builder /wheels /wheels
+RUN apt-get update && apt-get install -y --no-install-recommends libstdc++6 && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir /wheels/* && rm -rf /wheels && useradd --create-home astro
 USER astro
 ENV PORT=8000
