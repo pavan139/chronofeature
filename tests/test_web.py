@@ -115,7 +115,7 @@ def test_canonical_and_sitemap_use_configured_origin(monkeypatch):
     assert 'hreflang="x-default"' in r.text
     assert r.headers["x-robots-tag"] == "index, follow"
     tree = ElementTree.fromstring(client.get("/sitemap.xml").text)
-    assert len(list(tree)) == 9
+    assert len(list(tree)) == 13  # Nine calculator routes plus four English guides.
     assert "https://astro.example.org/sitemap.xml" in client.get("/robots.txt").text
     assert client.get("/ur/").headers["x-robots-tag"].startswith("noindex")
 

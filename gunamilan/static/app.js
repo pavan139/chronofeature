@@ -19,6 +19,7 @@
     cleanup();
     const version = ++generation;
     const t = Object.fromEntries([...document.querySelectorAll("#messages [data-key]")].map(el => [el.dataset.key, el.textContent]));
+    const explorer = window.AstroExplore.boot(t);
     const form = document.querySelector("#birth-form"), reading = document.querySelector("#reading");
     const output = document.querySelector("#report-content"), error = document.querySelector("#form-error");
     const button = form.querySelector('[type="submit"]'), label = button.querySelector(".submit-label");
@@ -33,7 +34,7 @@
     const reviewStep = document.querySelector("#review-step"), reviewPeople = document.querySelector("#review-people");
     const exampleButton = document.querySelector("#try-example"), sampleNotice = document.querySelector("#sample-notice");
     const resetStatus = document.querySelector("#reset-status");
-    let step = 0, sample = false, resetSnapshot = null, resetTimer;
+    let step = 0, sample = false, resetSnapshot = null, resetTimer, returnToReview = false;
     const val = name => form.elements.namedItem(name);
     const cleanUrl = () => document.querySelector('link[rel="canonical"]')?.href || location.origin + location.pathname;
     async function share(text = document.title) {
@@ -52,13 +53,13 @@
     document.querySelector("#share-page").addEventListener("click", () => share());
     document.querySelector("#share-result").addEventListener("click", () => share(shareSummary || document.title));
     document.querySelector("#theme-toggle").setAttribute("aria-pressed", String(document.documentElement.dataset.theme === "dark"));
-    document.querySelector('meta[name="theme-color"]').content = document.documentElement.dataset.theme === "dark" ? "#0d1f24" : "#142b32";
+    document.querySelector('meta[name="theme-color"]').content = document.documentElement.dataset.theme === "dark" ? "#18152b" : "#5b38df";
     document.querySelector("#theme-toggle").addEventListener("click", () => {
       const dark = document.documentElement.dataset.theme !== "dark";
       if (dark) document.documentElement.dataset.theme = "dark";
       else delete document.documentElement.dataset.theme;
       document.querySelector("#theme-toggle").setAttribute("aria-pressed", String(dark));
-      document.querySelector('meta[name="theme-color"]').content = dark ? "#0d1f24" : "#142b32";
+      document.querySelector('meta[name="theme-color"]').content = dark ? "#18152b" : "#5b38df";
     });
     if (installPrompt) installButton.hidden = false;
     installButton.addEventListener("click", async () => {
@@ -81,7 +82,7 @@
       fields: [...form.elements].filter(el => el.name).map(el => [el.name, el.type === "checkbox" ? el.checked : el.value]),
       selected: [...selected], open: [...form.querySelectorAll(".coordinates")].map(el => el.open),
       view, report: lastReport, request: lastRequest, ayanamsa: lastAyanamsa, calculatedAt,
-      step, sample, showingReport: !reading.hidden
+      step, sample, returnToReview, showingReport: !reading.hidden
     });
     function forgetUndo() {
       resetSnapshot = null; resetStatus.hidden = true; clearTimeout(resetTimer);
@@ -250,7 +251,7 @@
         heading.append(node("h4", val(person + "-name").value.trim()));
         const edit = node("button", t.edit, "text-button"); edit.type = "button";
         edit.setAttribute("aria-label", t.edit + ": " + val(person + "-name").value.trim());
-        edit.addEventListener("click", () => showStep(index)); heading.append(edit); card.append(heading);
+        edit.addEventListener("click", () => { returnToReview = true; showStep(index); }); heading.append(edit); card.append(heading);
         const dl = node("dl");
         const entries = [[t.date, date(val(person + "-date").value)],
           [t.time, val(person + "-unknown").checked ? t.unknown : val(person + "-time").value],
@@ -263,6 +264,7 @@
     }
     function showStep(index, focus = true) {
       step = Math.max(0, Math.min(index, people.length));
+      document.body.classList.remove("showing-report");
       workspace.hidden = false; reading.hidden = true;
       people.forEach((el, i) => el.hidden = i !== step);
       form.querySelector(".people").hidden = step === people.length;
@@ -275,7 +277,7 @@
         el.dataset.complete = String(i < step);
       });
       document.querySelector("#flow-count").textContent = number(step + 1) + " / " + number(people.length + 1);
-      if (step === people.length) buildReview();
+      if (step === people.length) { returnToReview = false; buildReview(); }
       if (focus) (step === people.length ? document.querySelector("#review-heading") : people[step].querySelector("legend")).focus();
     }
     form.querySelectorAll("[data-flow-step]").forEach(el => el.addEventListener("click", () => {
@@ -307,7 +309,8 @@
       });
       sample = true; invalidate(); clearFieldErrors(); showStep(people.length);
     });
-    showStep(saved?.view === view ? saved.step || 0 : 0, false); updateExample();
+    showStep(saved?.view === view ? saved.step || 0 : 0, false);
+    returnToReview = Boolean(saved?.returnToReview); updateExample();
     function personData(person) {
       const lat = val(person + "-latitude"), lon = val(person + "-longitude");
       if (lat.value === "" || lon.value === "") {
@@ -331,6 +334,8 @@
       summary.append(node("span", title), node("span", "English", "badge"));
       details.append(summary);
       const inner = node("div", null, "factor-content");
+      const definition = explorer.definition(title);
+      if (definition) inner.append(definition);
       for (const text of texts.filter(Boolean)) original(inner, text);
       details.append(inner); parent.append(details);
     }
@@ -338,18 +343,24 @@
       const details = node("details", null, "factor"), summary = node("summary");
       const name = locale === "ta" && item.tamil_name ? item.tamil_name : item.name;
       const good = porutham ? item.passed : item.score === item.maximum;
+      details.id = "factor-" + (porutham ? "porutham" : "ashtakoota") + "-" + item.name.toLowerCase().replace(/[ _]/g, "-");
+      details.dataset.factorState = good ? "full" : "review";
       const value = porutham ? (good ? t.passed : t.review) : number(item.score) + " / " + number(item.maximum);
       summary.append(node("span", name), node("span", value, good ? "badge" : "badge review"));
       details.append(summary);
       const inner = node("div", null, "factor-content");
       inner.append(node("p", t.groom + ": " + item.groom_attribute), node("p", t.bride + ": " + item.bride_attribute));
       const language = node("small", "English"); language.lang = "en"; inner.append(language);
+      const definition = explorer.definition(item.name);
+      if (definition) inner.append(definition);
+      original(inner, "How your result was calculated");
       original(inner, item.explanation);
       details.append(inner); parent.append(details);
     }
     function scoreCard(parent, name, value, maximum, warnings) {
       const card = node("article", null, "score-card");
       card.append(node("p", name, "score-label"));
+      card.append(explorer.helpButton(name === "Ashtakoota" ? "ashtakoota" : "porutham"));
       const total = node("div", number(value), "score-value"); total.append(node("small", " / " + number(maximum)));
       card.append(total);
       const progress = node("progress"); progress.max = maximum; progress.value = value; progress.setAttribute("aria-label", name + ": " + value + "/" + maximum);
@@ -373,6 +384,7 @@
           porutham ? match.essential_failures : match.blocking_doshas);
         const section = reportSection(title);
         for (const item of (porutham ? match.poruthams : match.kootas)) factor(section, item, porutham);
+        explorer.factorControls(section);
         sourceDetails(section, t.details, [match.verdict, ...Object.values(match.exceptions || {}).flat()]);
       }
       if (data.doshas) {
@@ -387,13 +399,16 @@
       }
       if (data.full_charts) for (const c of Object.values(data.full_charts)) renderChart(c, reportSection(c.name + " · " + t.chart));
       if (data.dasha) sourceDetails(output, "Vimshottari", [data.dasha.groom, data.dasha.bride]);
+      if (data.analysis) scores.after(explorer.matchOverview(data.analysis));
     }
     function renderChart(chart, parent = output) {
       const output = parent;
       output.append(node("h3", chart.name + " · " + t.chart));
+      output.append(explorer.chartExplorer(chart));
       const wrapper = node("div", null, "table-scroll"), table = node("table"), thead = node("thead"), header = node("tr");
       for (const heading of ["Graha","Rashi","°","Nakshatra","Pada","Navamsa","House"]) {
-        const th = node("th",heading); th.scope = "col"; header.append(th);
+        const th = node("th",heading); th.scope = "col";
+        th.append(explorer.helpButton(({Graha:"graha",Rashi:"rashi","°":"longitude",Nakshatra:"nakshatra",Pada:"pada",Navamsa:"navamsa",House:"house"})[heading])); header.append(th);
       }
       thead.append(header); table.append(thead); const body = node("tbody");
       for (const g of chart.grahas || []) {
@@ -411,6 +426,7 @@
           timeline.append(node("li", period.lord + " · " + date(period.start) + " → " + date(period.end)));
         }
         output.append(node("h3","Vimshottari"),timeline);
+        const definition = explorer.definition("Vimshottari"); if (definition) output.append(definition);
       }
       if (chart.doshas) for (const d of Object.values(chart.doshas)) sourceDetails(output,d.name,[d.detail,...d.cancellations]);
     }
@@ -422,10 +438,12 @@
         sourceDetails(output,t.details,[data.accuracy_warning]);
       }
       if (view === "chart") renderChart(data); else renderMatch(data);
+      output.append(explorer.nextSteps(view === "chart"), explorer.provenance(data));
       shareSummary = [...output.querySelectorAll(".score-card")].map(card =>
         card.querySelector(".score-label").textContent + " " + card.querySelector(".score-value").textContent.replace(/\s+/g, " ").trim()
       ).join(" · ") || document.title;
       reading.hidden = false; workspace.hidden = true;
+      document.body.classList.add("showing-report");
       toggleDetails.textContent = t.expandAll; toggleDetails.setAttribute("aria-expanded", "false");
       document.querySelector("#result-heading").textContent = view === "chart" ? body.name : body.groom.name + " & " + body.bride.name;
     }
@@ -488,7 +506,7 @@
       event.preventDefault();
       if (resultController) return;
       if (step < people.length) {
-        if (validatePerson(step)) showStep(step + 1);
+        if (validatePerson(step)) showStep(returnToReview ? people.length : step + 1);
         return;
       }
       for (let i = 0; i < people.length; i++) if (!validatePerson(i)) return;
@@ -502,6 +520,7 @@
       resultController = new AbortController(); const own = resultController; controllers.add(own);
       const timeout = setTimeout(() => own.abort("timeout"), 30000); timers.add(timeout);
       button.disabled = true; label.textContent = t.loading; form.setAttribute("aria-busy", "true");
+      form.querySelectorAll("[data-flow-step],#flow-back").forEach(el => el.disabled = true);
       try {
         const endpoint = view === "chart" ? "/chart?ayanamsa=" + encodeURIComponent(calculationAyanamsa) : "/match/full";
         const response = await fetch(endpoint, {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body),signal:own.signal,cache:"no-store"});
@@ -516,7 +535,7 @@
         if (version === generation && (!own.signal.aborted || own.signal.reason === "timeout")) showError();
       } finally {
         clearTimeout(timeout); controllers.delete(own);
-        if (version === generation && resultController === own) { button.disabled = false; label.textContent = step === people.length ? t.calculate : t.continue; form.removeAttribute("aria-busy"); resultController = null; }
+        if (version === generation && resultController === own) { button.disabled = false; label.textContent = step === people.length ? t.calculate : t.continue; form.removeAttribute("aria-busy"); resultController = null; form.querySelectorAll("[data-flow-step],#flow-back").forEach(el => el.disabled = false); }
       }
     });
     form.addEventListener("reset", () => {
@@ -530,6 +549,7 @@
       queueMicrotask(() => {
         form.querySelectorAll('[type="time"]').forEach(el => {el.disabled = false; el.required = true;});
         button.disabled = false; form.removeAttribute("aria-busy"); resultController = null;
+        form.querySelectorAll("[data-flow-step],#flow-back").forEach(el => el.disabled = false);
         showStep(0); updateExample();
         resetSnapshot = snapshot; resetStatus.hidden = false;
         resetTimer = setTimeout(forgetUndo, 15000); timers.add(resetTimer);
@@ -543,12 +563,14 @@
       if (lastReport && lastRequest && snapshot.showingReport) { renderRecord(lastReport, lastRequest); reading.focus(); }
     });
     document.querySelector("#edit").addEventListener("click", () => showStep(people.length));
-    let printOpen = [];
+    let printOpen = [], printHidden = [];
     const beforePrint = () => {
       printOpen = [...reading.querySelectorAll("details")].map(el => [el,el.open]);
       printOpen.forEach(([el]) => el.open = true);
+      printHidden = [...reading.querySelectorAll("[data-factor-state]")].map(el => [el,el.hidden]);
+      printHidden.forEach(([el]) => el.hidden = false);
     };
-    const afterPrint = () => printOpen.forEach(([el,open]) => el.open = open);
+    const afterPrint = () => { printOpen.forEach(([el,open]) => el.open = open); printHidden.forEach(([el,hidden]) => el.hidden = hidden); };
     window.onbeforeprint = beforePrint; window.onafterprint = afterPrint;
     document.querySelector("#print").addEventListener("click", () => window.print());
     document.querySelectorAll(".locale-link").forEach(link => link.addEventListener("click", event => {

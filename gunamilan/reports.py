@@ -9,6 +9,7 @@ from fastapi.responses import Response
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from .web import catalogs
+from .knowledge import TERMS, term_key
 
 ROOT = Path(__file__).parent
 PDF_SLOTS = BoundedSemaphore(2)
@@ -38,6 +39,7 @@ def report_html(data, births, mode, locale, ayanamsa):
         t=t, lang=locale, mode=mode, data=data, births=births, charts=charts,
         ayanamsa=ayanamsa, generated=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         css=report_css(), title=t["title"] if mode == "match" else t["chart"],
+        terms=TERMS, term_key=term_key,
     )
 
 

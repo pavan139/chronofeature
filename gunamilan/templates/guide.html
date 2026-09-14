@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en" dir="ltr"><head>{% include "head.html" %}</head><body data-view="guide">
+<a class="skip" href="#guide-main">Skip to guide</a>
+<header class="header guide-header"><a class="brand" href="/en/">astro<span class="brand-dot">.</span></a><nav aria-label="Main navigation"><a href="/en/">Compatibility</a><a href="/en/birth-chart/">Birth chart</a><a href="/en/guide/" aria-current="page">Guide</a></nav><a class="secondary" href="/en/">Open calculator ↗</a></header>
+<main id="guide-main" class="guide-main">
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/en/">Astro</a><span>/</span>{% if article %}<a href="/en/guide/">Guide</a><span>/</span><span>{{ article.title }}</span>{% else %}<span>Guide</span>{% endif %}</nav>
+<section class="guide-hero"><div class="eyebrow">THE ASTRO FIELD GUIDE / ENGLISH</div><h1>{{ title }}</h1><p>{{ description }}</p></section>
+{% if article %}
+<div class="article-layout"><nav class="article-toc" aria-label="On this page"><h2>On this page</h2>{% for heading, text in article.sections %}<a href="#section-{{ loop.index }}">{{ heading }}</a>{% endfor %}</nav><article class="guide-article">{% for heading, text in article.sections %}<section id="section-{{ loop.index }}"><h2>{{ heading }}</h2><p>{{ text }}</p></section>{% endfor %}<section class="related-terms"><h2>Related terms</h2>{% for key in article.terms %}<a href="/en/guide/#{{ key }}">{{ terms[key].title }}</a>{% endfor %}</section><p class="editorial-note">Implementation note: this guide describes Astro's supplied Python rules. It is not a scientific validation of astrology. Detailed explanations are maintained in one shared source for the help panel, website and PDFs.</p></article></div>
+{% endif %}
+<section class="guide-cards" aria-label="Explore guides">{% for slug, item in articles.items() %}<a href="/en/guide/{{ slug }}/"><span class="eyebrow">0{{ loop.index }} / GUIDE</span><h2>{{ item.title }}</h2><p>{{ item.description }}</p><span aria-hidden="true">↗</span></a>{% endfor %}</section>
+{% if not article %}
+<section class="dictionary" aria-labelledby="dictionary-title"><div class="dictionary-head"><div><span class="eyebrow">SMALL WORDS. BIG CLARITY.</span><h2 id="dictionary-title">Every term, explained.</h2></div><div><label for="glossary-search">Find a term</label><input type="search" id="glossary-search" placeholder="Try Nadi, nakshatra or PDF" maxlength="160"></div></div><p id="glossary-count" role="status">{{ terms|length }} terms</p><div class="glossary-grid">{% for key, item in terms.items() %}<article class="glossary-term" id="{{ key }}" data-group="{{ item.group }}"><span class="eyebrow">{{ item.group }}</span><h3>{{ item.title }}</h3><p>{{ item.meaning }}</p><p class="next-prompt"><strong>Try this</strong> {{ item.next_step }}</p><a href="#{{ key }}" aria-label="Link to {{ item.title }}"># {{ item.title }}</a></article>{% endfor %}</div><p id="glossary-empty" hidden>No matching term. Try “Moon”, “time”, “score” or “PDF”.</p></section>
+<section class="faq-block"><h2>Common questions</h2>{% for question, answer in faq %}<details><summary>{{ question }}</summary><p>{{ answer }}</p></details>{% endfor %}</section>
+{% endif %}
+<div class="guide-banner"><div><h2>Ready to explore your charts?</h2><p>Birth details, review, then a report you can understand.</p></div><a class="primary" href="/en/">Start a comparison ↗</a></div>
+</main><footer><a href="/en/" class="brand">astro.</a><p>Private by design. Clear by intention.</p><a href="/en/guide/privacy-and-exports/">Privacy & exports</a></footer>
+</body></html>

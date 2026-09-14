@@ -242,6 +242,8 @@ def chart_endpoint(birth: BirthInput, ayanamsa: str = "lahiri") -> dict:
         out["place_warning"] = warning
     if note := _accuracy_note(chart):
         out["accuracy_warning"] = note
+    from .insights import analyze_chart
+    out["analysis"] = analyze_chart(out)
     return out
 
 
@@ -324,6 +326,10 @@ def match_full(req: MatchRequest) -> dict:
         ),
     }
     result["full_charts"] = {"groom": _chart_dict(groom), "bride": _chart_dict(bride)}
+    from .insights import analyze_match, analyze_chart
+    result["analysis"] = analyze_match(result)
+    for chart in result["full_charts"].values():
+        chart["analysis"] = analyze_chart(chart)
     return result
 
 

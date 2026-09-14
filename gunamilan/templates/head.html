@@ -1,0 +1,28 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }} | Astro</title>
+<meta name="description" content="{{ description }}">
+<meta name="robots" content="{{ 'index,follow' if indexable else 'noindex,follow' }}">
+<meta name="theme-color" content="#5b38df">
+<meta name="color-scheme" content="light dark">
+<meta name="application-name" content="Astro">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+{% if canonical %}<link rel="canonical" href="{{ canonical }}"><meta property="og:url" content="{{ canonical }}">{% endif %}
+{% for a in alternates %}<link rel="alternate" hreflang="{{ a.code }}" href="{{ a.url }}"><meta property="og:locale:alternate" content="{{ a.code }}_IN">{% endfor %}
+{% for a in alternates %}{% if a.code == 'en' %}<link rel="alternate" hreflang="x-default" href="{{ a.url }}">{% endif %}{% endfor %}
+<meta property="og:type" content="website"><meta property="og:title" content="{{ title }} | Astro">
+<meta property="og:description" content="{{ description }}"><meta property="og:site_name" content="Astro">
+<meta property="og:locale" content="{{ og_locale }}">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{{ title }} | Astro">
+<meta name="twitter:description" content="{{ description }}">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/static/favicon.svg">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/static/app.css">
+<link rel="stylesheet" href="/static/flow.css">
+<link rel="stylesheet" href="/static/studio.css">
+{% if view == "guide" %}<script src="/static/guide.js" defer></script>{% else %}<script src="/static/explore.js" defer></script><script src="/static/app.js" defer></script>{% endif %}
+<script type="application/ld+json" nonce="{{ nonce }}">{{ schema|tojson }}</script>
+{% if origin %}<meta property="og:image" content="{{ origin }}/social-card.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:type" content="image/png"><meta property="og:image:alt" content="Astro. Kundali matching, birth charts and explained reports."><meta name="twitter:image" content="{{ origin }}/social-card.png"><meta name="twitter:image:alt" content="Astro. Kundali matching, birth charts and explained reports.">{% endif %}

@@ -2,7 +2,7 @@
 <html lang="{{ lang }}" dir="{{ t.dir }}"><head><meta charset="utf-8"><title>Astro | {{ title }}</title><meta name="author" content="Astro"><style>{{ css|safe }}</style></head>
 <body>
 <header><div class="brand">astro.</div><p class="meta ltr">{{ generated }} | {{ ayanamsa|title }}</p></header>
-<h1>{{ title }}</h1><p>{{ t.note }}</p>
+<h1>{{ title }}</h1>
 <p class="muted" lang="en" dir="ltr">Personal report. Keep this downloaded file private. Interface labels follow your selected language. Detailed calculations and rule explanations below are in English.</p>
 {% if data.accuracy_warning %}<div class="notice"><strong>{{ t.unknown }} - {{ t.review }}</strong><p lang="en" dir="ltr">{{ data.accuracy_warning }}</p></div>{% endif %}
 <h2>{{ t.details }}</h2>
@@ -19,7 +19,7 @@
 {% if data.ashtakoota %}<div class="score"><p>Ashtakoota</p><div class="value">{{ data.ashtakoota.total }} <small>/ {{ data.ashtakoota.maximum }}</small></div></div>{% endif %}
 {% if data.porutham %}<div class="score"><p>Dasa Porutham</p><div class="value">{{ data.porutham.passed }} <small>/ {{ data.porutham.total }}</small></div></div>{% endif %}
 </div>
-<p class="muted" lang="en" dir="ltr">These are traditional scores, not probabilities of relationship success. Essential checks and exceptions are separate from the total.</p>
+{% if data.analysis %}<div class="analysis-summary" lang="en" dir="ltr"><h2>At a glance</h2><p>{{ data.analysis.summary }}</p><p class="muted">{{ data.analysis.accuracy }}</p><h3>Full-point factors</h3><p>{% for item in data.analysis.full_points %}{{ item.name }} ({{ item.score }} / {{ item.maximum }}){% if not loop.last %}, {% endif %}{% else %}No factor received full points.{% endfor %}</p><h3>Where points differ</h3><p>{% for item in data.analysis.review_factors %}{{ item.name }} ({{ item.score }} / {{ item.maximum }}){% if not loop.last %}, {% endif %}{% else %}Every included factor received its maximum.{% endfor %}</p><h3>Essential checks</h3><p>{{ data.analysis.essential_flags|join(' · ') if data.analysis.essential_flags else 'No essential review flags under the implemented rules. This is not a guarantee of an outcome.' }}</p>{% for item in data.analysis.exceptions %}<p>{{ item.name }} exception: {{ item.text }}</p>{% endfor %}<p class="muted">{{ data.analysis.context }}</p></div>{% endif %}
 {% for key, heading in [('ashtakoota','Ashtakoota'),('porutham','Dasa Porutham')] %}
 {% set result = data.get(key) %}{% if result %}
 <section class="section" lang="en" dir="ltr"><h2>{{ heading }}</h2><p class="source">DETAILED INTERPRETATION / ENGLISH</p>
@@ -28,7 +28,9 @@
 </div>
 {% for f in (result.kootas if key == 'ashtakoota' else result.poruthams) %}<article class="factor">
 <h3>{{ f.name }} <span class="points">{{ (f.score|string + ' / ' + f.maximum|string) if key == 'ashtakoota' else ('Matched' if f.passed else 'Needs review') }}</span></h3>
-<p class="muted">Groom: {{ f.groom_attribute }} | Bride: {{ f.bride_attribute }}</p><p>{{ f.explanation }}</p>
+{% set definition = terms.get(term_key(f.name)) %}{% if definition %}<p><strong>What this means</strong> {{ definition.meaning }}</p>{% endif %}
+<p class="muted">Groom: {{ f.groom_attribute }} | Bride: {{ f.bride_attribute }}</p><p><strong>Your calculation</strong> {{ f.explanation }}</p>
+{% if definition %}<p class="muted"><strong>Try this</strong> {{ definition.next_step }}</p>{% endif %}
 </article>{% endfor %}
 {% for key, value in (result.exceptions or {}).items() %}<div class="details"><h3>{{ key|replace('_',' ')|title }}</h3>{% if value is string %}<p>{{ value }}</p>{% else %}{% for v in value %}<p>{{ v }}</p>{% endfor %}{% endif %}</div>{% endfor %}
 </section>{% endif %}{% endfor %}
@@ -39,6 +41,7 @@
 {% endif %}
 {% for chart in charts %}<section class="{{ 'section' if mode == 'match' else 'chart-section' }}"><h2>{{ t.chart }}</h2><p class="report-heading" dir="auto">{{ chart.name }}</p>
 <div lang="en" dir="ltr"><p class="source">SIDEREAL POSITIONS / ENGLISH</p>
+{% if chart.analysis %}<div class="details"><h3>Your chart at a glance</h3>{% for item in chart.analysis.highlights %}<p><strong>{{ item.title }}: {{ item.value }}</strong> | {{ item.detail }}</p>{% endfor %}<p class="muted">{{ chart.analysis.accuracy }}</p></div>{% endif %}
 {% if chart.ascendant %}<p>Lagna: {{ chart.ascendant.rashi }} | {{ chart.ascendant.degrees }} | Navamsa: {{ chart.ascendant.navamsa }}</p>{% else %}<p class="notice">Birth time unknown. Ascendant and house numbers are omitted.</p>{% endif %}
 <table><thead><tr><th>Graha</th><th>Rashi</th><th>Degrees</th><th>Nakshatra</th><th>Pada</th><th>Navamsa</th><th>House</th></tr></thead><tbody>
 {% for g in chart.grahas %}<tr><td>{{ g.name }}</td><td>{{ g.rashi }}</td><td>{{ g.degrees }}</td><td>{{ g.nakshatra }}</td><td>{{ g.pada }}</td><td>{{ g.navamsa }}</td><td>{{ g.house if g.house else '-' }}</td></tr>{% endfor %}
@@ -48,5 +51,7 @@
 {% for key, d in (chart.doshas or {}).items() %}<div class="details"><h3>{{ key|replace('_',' ')|title }}</h3><p>{{ d.detail }}</p>{% for note in d.cancellations or [] %}<p>{{ note }}</p>{% endfor %}</div>{% endfor %}
 </div></section>{% endfor %}
 {% if mode == 'match' and data.dasha %}<section lang="en" dir="ltr"><h2>Current Vimshottari periods</h2><p>Groom: {{ data.dasha.groom }}</p><p>Bride: {{ data.dasha.bride }}</p><p class="muted">Sub-period timing follows the supplied engine and has not been independently validated. Groom-only candidate windows are not presented as shared or predicted dates.</p></section>{% endif %}
+<section class="section" lang="en" dir="ltr"><h2>Chart glossary</h2><p class="source">PLAIN-LANGUAGE EXPLANATIONS / ENGLISH</p>{% for key in ['graha','rashi','nakshatra','pada','navamsa','lagna','house','longitude','retrograde','combust','dignity','mangal','kaal-sarp','sade-sati','vimshottari','ayanamsa'] %}<article class="glossary-entry"><h3>{{ terms[key].title }}</h3><p>{{ terms[key].meaning }}</p><p class="muted">{{ terms[key].next_step }}</p></article>{% endfor %}</section>
+<section lang="en" dir="ltr"><h2>Next steps</h2><ol><li>Verify the recorded birth details, timezone and ayanamsa.</li><li>Read the rule explanation and limitations before using a flag or period date.</li>{% if mode == 'match' %}<li>Discuss communication, boundaries, daily routines and shared plans directly.</li>{% endif %}<li>Keep this downloaded file private. Sharing a public page link does not share this report.</li></ol></section>
 <div class="endnote"><p>{{ t.note }}</p><p class="muted" lang="en" dir="ltr">Astro | Swiss Ephemeris | Place data: GeoNames, CC BY 4.0. Ayanamsa: {{ ayanamsa|title }}. Unknown time uses local noon as an approximation. A new export recalculates current-period and transit notes at generation time. No server copy is retained.</p></div>
 </body></html>

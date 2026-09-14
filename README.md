@@ -20,7 +20,12 @@ Open http://127.0.0.1:8000/en/. Coordinate-based charts and matching work withou
 - Clear details supports a 15-second undo window in page memory. New input discards the snapshot immediately.
 - Summary-first reports with grouped technical disclosures and PDF as the primary export. Print, share and JSON remain available under more options.
 - Natal chart, Navamsa, Vimshottari periods, doshas and explicit exceptions.
-- Responsive ink-and-copper theme, session-only dark mode, keyboard place selection, visible focus and reduced-motion support.
+- Violet-and-lime Studio interface, session-only dark mode, keyboard place selection, visible focus and reduced-motion support.
+- Rule-grounded summaries show full-point factors, points not earned, essential checks, exceptions and input uncertainty. Summary links open the exact underlying factor.
+- Searchable contextual help with 37 definitions, native modal focus handling, Escape return and the `?` shortcut. No AI service receives personal details.
+- Nine-graha sidereal explorer with actual longitude markers, Sun/Moon/ascendant highlights, keyboard-friendly planet controls and help for every table column.
+- Review-only factor filters, print restoration, and private in-memory next-step checklists. Editing a review card returns directly to review.
+- Expanded PDFs include the same factor definitions, arithmetic summary, glossary and next steps as the website.
 - Privacy-safe Web Share and link-copy actions. Shared URLs never contain names, dates, places or calculation inputs.
 - Installable web-app manifest with standalone display metadata.
 - Localized date formatting, explicit unknown-time state, print stylesheet.
@@ -49,6 +54,10 @@ Pages render substantive controls and headings on the server. Each language has 
 - `/{locale}/birth-chart/`: natal chart
 
 Route-specific titles and descriptions, Open Graph and X metadata, canonical URLs, supported-language hreflang alternates, x-default, WebSite/WebPage/WebApplication JSON-LD, sitemap, robots and a web-app manifest are generated from configuration. Unknown routes return 404. No invented testimonials, ratings, doorway location pages or unverified ranking claims are included.
+
+The English guide at `/en/guide/` contains a searchable, server-rendered glossary and three substantive articles on report interpretation, input accuracy and privacy/exports. Article/CollectionPage and BreadcrumbList metadata match visible content. These four pages enter the sitemap only when English indexing is enabled. They are not duplicated under untranslated locales. A fixed 1200 × 630 PNG social card is served at `/social-card.png`, with absolute Open Graph/X metadata when `SITE_URL` is configured.
+
+Visible FAQs help readers but are not advertised as FAQ rich results. Google retired that feature in May 2026. Its current AI-search guidance does not require `llms.txt` or special AI schema. See the [Studio research and release checklist](docs/studio-upgrade.md).
 
 By default all pages are **noindex** and robots disallows crawling. A private repository does not make a deployed web service private. Authentication belongs to the chosen host or reverse proxy.
 

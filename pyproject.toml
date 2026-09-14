@@ -9,7 +9,7 @@ description = "Multilingual Vedic compatibility and birth charts"
 requires-python = ">=3.11"
 dependencies = [
   "pyswisseph>=2.10.3,<3", "fastapi>=0.110,<1", "uvicorn[standard]>=0.29,<1",
-  "pydantic>=2.6,<3", "jinja2>=3.1.4,<4", "tzdata>=2024.1", "weasyprint==70.0"
+  "pydantic>=2.6,<3", "jinja2>=3.1.4,<4", "tzdata>=2024.1", "weasyprint==70.0", "pillow>=11,<13"
 ]
 
 [project.optional-dependencies]

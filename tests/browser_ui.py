@@ -16,6 +16,19 @@ with sync_playwright() as playwright:
     page.goto("http://127.0.0.1:8000/en/")
     page.screenshot(path=str(ARTIFACTS / "desktop.png"), full_page=True)
     page.locator("#theme-toggle").click()
+    # Contextual help is keyboard reachable, local and preserves the input.
+    help_button = page.locator('[data-person="groom"] [data-help="birth-time"]')
+    help_button.click()
+    assert page.locator("#help-dialog").is_visible()
+    assert page.locator("#help-search").evaluate("e => e === document.activeElement")
+    page.locator("#help-search").fill("Nadi")
+    assert "Nadi" in page.locator("#help-topic h3").inner_text()
+    page.screenshot(path=str(ARTIFACTS / "studio-help.png"))
+    page.locator("#help-search").fill("unfindablezzzzz")
+    assert "No matching term" in page.locator("#help-topic").inner_text()
+    page.keyboard.press("Escape")
+    assert not page.locator("#help-dialog").is_visible()
+    assert help_button.evaluate("e => e === document.activeElement")
     page.emulate_media(reduced_motion="reduce")
     assert page.evaluate("document.documentElement.dataset.theme") == "dark"
     page.screenshot(path=str(ARTIFACTS / "desktop-dark.png"), full_page=True)
@@ -42,6 +55,10 @@ with sync_playwright() as playwright:
     assert not calculations, "Review must not silently calculate or submit birth details"
     assert page.locator("#review-step").is_visible()
     assert page.locator(".review-card").count() == 2
+    page.locator(".review-card .text-button").first.click()
+    page.locator("#groom-name").fill("Test A")
+    page.locator('#birth-form button[type="submit"]').click()
+    assert page.locator("#review-step").is_visible(), "Editing one person must return directly to review"
     page.screenshot(path=str(ARTIFACTS / "flow-review.png"))
     page.locator(".language-menu summary").click()
     page.locator('.locale-link[lang="hi"]').click()
@@ -56,6 +73,20 @@ with sync_playwright() as playwright:
     assert not page.locator("#form-error").is_visible()
     assert page.locator(".workspace").is_hidden()
     assert page.locator(".report-section[open]").count() == 0
+    assert page.locator(".analysis-overview").is_visible()
+    page.locator(".insight-link").first.click()
+    assert page.locator(".report-section[open]").count() == 1
+    assert page.locator(".factor[open] .definition").is_visible()
+    section = page.locator(".report-section[open]")
+    section.locator(".factor-filter input").check()
+    assert section.locator('[data-factor-state="full"]:visible').count() == 0
+    page.evaluate("window.onbeforeprint()")
+    assert section.locator('[data-factor-state][hidden]').count() == 0
+    page.evaluate("window.onafterprint()")
+    section.locator(".factor-filter input").uncheck()
+    page.locator(".report-section[open]>summary").click()
+    page.set_viewport_size({"width": 1440, "height": 1100})
+    page.screenshot(path=str(ARTIFACTS / "studio-report.png"), full_page=True)
     page.evaluate("navigator.share = data => { window.__shared = data; return Promise.resolve(); }")
     page.locator(".export-menu summary").click()
     page.locator("#share-result").click()
@@ -118,6 +149,12 @@ with sync_playwright() as playwright:
     page.locator('#birth-form button[type="submit"]').click()
     page.locator("#reading").wait_for(state="visible")
     assert page.locator("#reading .notice").count() == 1
+    assert page.locator(".chart-highlights").inner_text().find("Not calculated") >= 0
+    page.locator(".planet-buttons button", has_text="Mars").click()
+    assert page.locator(".planet-buttons button[aria-pressed=true]").inner_text() == "Mars"
+    assert "POSITION / Mars" in page.locator(".planet-detail").inner_text()
+    assert page.locator(".chart-planet.selected").count() == 1
+    page.screenshot(path=str(ARTIFACTS / "studio-chart.png"), full_page=True)
     with page.expect_download(timeout=60000) as download:
         page.locator("#download-pdf").click()
     assert download.value.suggested_filename == "astro-chart.pdf"
@@ -184,6 +221,24 @@ with sync_playwright() as playwright:
     page.locator("#bride-place").fill("missing")
     page.locator("#bride-lat").wait_for(state="visible")
     assert page.locator("#bride-lat").is_visible()
+    # Real public guides stay readable without JavaScript. Search is progressive enhancement.
+    page.goto("http://127.0.0.1:8000/en/guide/")
+    page.locator("#glossary-search").fill("Vimshottari")
+    assert page.locator(".glossary-term:visible").count() == 1
+    page.locator("#glossary-search").fill("missingzzzz")
+    assert page.locator("#glossary-empty").is_visible()
+    page.goto("http://127.0.0.1:8000/en/guide/#nadi")
+    assert page.locator("#nadi").is_visible()
+    page.set_viewport_size({"width":390,"height":844})
+    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+    page.goto("http://127.0.0.1:8000/en/guide/understand-your-report/")
+    assert page.locator(".guide-article h2").first.is_visible()
+    page.screenshot(path=str(ARTIFACTS / "studio-guide-mobile.png"), full_page=True)
+    no_js = browser.new_context(java_script_enabled=False)
+    guide = no_js.new_page()
+    guide.goto("http://127.0.0.1:8000/en/guide/")
+    assert guide.locator(".glossary-term").count() == 37
+    no_js.close()
     assert not errors, errors
     browser.close()
-print("Browser flows passed: guided steps, validation focus, review before submission, same birthplace, reset/undo, 23-language mobile sample flows, real reports, PDF/JSON downloads, export recovery, locale handoff, progressive disclosure, unknown time, RTL, keyboard places.")
+print("Browser flows passed: contextual help and Escape focus, explanation links, review filters and print restoration, graha explorer, SSR guides with/without JS, guided steps, review editing, 23-language mobile flows, real reports and PDF/JSON exports, recovery, RTL and keyboard places.")

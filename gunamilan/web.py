@@ -13,6 +13,8 @@ from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, Red
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.gzip import GZipMiddleware
 from fastapi.templating import Jinja2Templates
+from .knowledge import TERMS, ARTICLES, FAQ
+from .social import social_card
 
 ROOT = Path(__file__).parent
 TEMPLATES = Jinja2Templates(directory=ROOT / "templates")
@@ -72,10 +74,14 @@ def install_web(app):
             "start_url": "/en/",
             "scope": "/",
             "display": "standalone",
-            "background_color": "#f6f8f8",
-            "theme_color": "#142b32",
+            "background_color": "#f5f3fa",
+            "theme_color": "#5b38df",
             "icons": [{"src": "/static/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}],
         }, media_type="application/manifest+json")
+
+    @app.get("/social-card.png", include_in_schema=False)
+    def social_image():
+        return Response(social_card(), media_type="image/png", headers={"Cache-Control": "public, max-age=86400"})
 
     @app.get("/robots.txt", include_in_schema=False)
     def robots():
@@ -92,6 +98,8 @@ def install_web(app):
         origin = site_origin()
         urls = [origin + "/" + lang + "/" + (route + "/" if route else "")
                 for lang in sorted(index_locales()) for route in ROUTES]
+        if "en" in index_locales():
+            urls += [origin + "/en/guide/"] + [origin + "/en/guide/" + slug + "/" for slug in ARTICLES]
         body = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
         body += "".join("<url><loc>" + escape(url) + "</loc></url>" for url in urls)
         return Response(body + "</urlset>", media_type="application/xml")
@@ -111,10 +119,14 @@ def install_web(app):
                       for code in sorted(index_locales()) if len(code) == 2] if origin else []
         title = t["chart"] if view == "chart" else ("Dasa Porutham · " + t["title"] if view == "porutham" else t["title"])
         descriptions = {
-            "match": t["intro"] + " " + t["note"],
-            "porutham": "Dasa Porutham. " + t["intro"] + " " + t["note"],
-            "chart": t["chart"] + ". " + t["intro"] + " " + t["note"],
+            "match": t["title"] + ". " + t["intro"] + " " + t["downloadPdf"] + ".",
+            "porutham": "Dasa Porutham. " + t["intro"] + " " + t["downloadPdf"] + ".",
+            "chart": t["chart"] + ". " + t["chartIntro"] + " " + t["downloadPdf"] + ".",
         }
+        if lang == "en":
+            descriptions.update(match="Free Kundali matching with 36-point Ashtakoota, 10 Porutham checks, explained factors and private PDF reports. No account needed.",
+                                porutham="Check all 10 Dasa Porutham factors, including Rajju and Vedha. Understand each result, compare Ashtakoota and download a private PDF.",
+                                chart="Calculate your sidereal birth chart. Explore nine grahas, Moon sign, nakshatra, Navamsa and Vimshottari periods with explanations and PDF export.")
         description = descriptions[view]
         page_id = canonical or "/" + lang + "/" + route
         schema = {
@@ -139,11 +151,50 @@ def install_web(app):
             "title": title, "description": description, "og_locale": lang.replace("-", "_") + "_IN",
             "canonical": canonical, "alternates": alternates,
             "indexable": indexable, "route": route, "nonce": request.state.nonce,
-            "schema": schema,
+            "schema": schema, "origin": origin, "knowledge": TERMS, "faq": FAQ,
         })
         response.headers["Content-Language"] = lang
         response.headers["X-Robots-Tag"] = "index, follow" if indexable else "noindex, follow"
         return response
+
+    def render_guide(request, slug=None):
+        article = ARTICLES.get(slug) if slug else None
+        if slug and not article:
+            raise HTTPException(404, "Guide not found")
+        origin = site_origin()
+        path = "/en/guide/" + (slug + "/" if slug else "")
+        canonical = origin + path if origin else None
+        title = article["title"] if article else "Astrology terms, reports and help"
+        description = article["description"] if article else "A plain-language guide to Kundali matching, birth-chart terms, unknown birth time and private PDF exports. Search 37 explained terms."
+        page_id = canonical or path
+        crumbs = [{"@type": "ListItem", "position": 1, "name": "Astro", "item": origin + "/en/"},
+                  {"@type": "ListItem", "position": 2, "name": "Guide", "item": origin + "/en/guide/"}]
+        if article:
+            crumbs.append({"@type": "ListItem", "position": 3, "name": title, "item": page_id})
+        graph = [{"@type": "Article" if article else "CollectionPage", "@id": page_id,
+                  "name": title, "headline": title, "description": description, "inLanguage": "en",
+                  **({"url": canonical} if canonical else {})},
+                 {"@type": "BreadcrumbList", "itemListElement": crumbs}]
+        if article:
+            graph[0]["articleBody"] = "\n\n".join(heading + "\n" + text for heading, text in article["sections"])
+        response = TEMPLATES.TemplateResponse(request=request, name="guide.html", context={
+            "t": catalogs()["en"], "lang": "en", "view": "guide", "title": title,
+            "description": description, "og_locale": "en_IN", "origin": origin,
+            "canonical": canonical, "alternates": [], "indexable": "en" in index_locales(),
+            "nonce": request.state.nonce, "schema": {"@context": "https://schema.org", "@graph": graph},
+            "terms": TERMS, "articles": ARTICLES, "article": article, "faq": FAQ,
+        })
+        response.headers["Content-Language"] = "en"
+        response.headers["X-Robots-Tag"] = "index, follow" if "en" in index_locales() else "noindex, follow"
+        return response
+
+    @app.get("/en/guide/", response_class=HTMLResponse, include_in_schema=False)
+    def guide(request: Request):
+        return render_guide(request)
+
+    @app.get("/en/guide/{slug}/", response_class=HTMLResponse, include_in_schema=False)
+    def guide_article(request: Request, slug: str):
+        return render_guide(request, slug)
 
     @app.get("/{lang}/", response_class=HTMLResponse, include_in_schema=False)
     def home(request: Request, lang: str):

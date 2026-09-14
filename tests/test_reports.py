@@ -55,6 +55,9 @@ def test_match_pdf_contains_full_factors_both_charts_and_exceptions():
     text = "\n".join(p.extract_text() for p in reader.pages)
     for term in ["Ashtakoota", "Dasa Porutham", "Nadi", "Rajju", "Dosha review", "Sample Partner", "Planet condition"]:
         assert term in text
+    for term in ["At a glance", "Where points differ", "What this means", "Your calculation", "Chart glossary", "Next steps"]:
+        assert term in text
+    assert "A traditional reading" not in text
     assert "shared_windows" not in text
     assert 4 <= len(reader.pages) <= 20
     target = Path("test-results")
