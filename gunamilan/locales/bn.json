@@ -41,5 +41,9 @@
   "copy": "লিংক কপি করুন",
   "copied": "লিংক কপি হয়েছে",
   "install": "অ্যাপ ইনস্টল করুন",
-  "theme": "থিম পরিবর্তন করুন"
+  "theme": "থিম পরিবর্তন করুন",
+  "downloadPdf": "PDF ডাউনলোড",
+  "downloadJson": "JSON ডাউনলোড",
+  "expandAll": "সব খুলুন",
+  "collapseAll": "সব বন্ধ করুন"
 }

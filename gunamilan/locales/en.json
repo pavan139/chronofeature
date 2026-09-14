@@ -41,5 +41,9 @@
   "copy": "Copy link",
   "copied": "Link copied",
   "install": "Install app",
-  "theme": "Change theme"
+  "theme": "Change theme",
+  "downloadPdf": "Download PDF",
+  "downloadJson": "Download JSON",
+  "expandAll": "Expand all",
+  "collapseAll": "Collapse all"
 }

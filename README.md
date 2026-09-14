@@ -21,13 +21,16 @@ Open http://127.0.0.1:8000/en/. Coordinate-based charts and matching work withou
 - Privacy-safe Web Share and link-copy actions. Shared URLs never contain names, dates, places or calculation inputs.
 - Installable web-app manifest with standalone display metadata.
 - Localized date formatting, explicit unknown-time state, print stylesheet.
-- Language switching retains entered details in page memory. Refresh clears them.
+- Direct PDF downloads for both compatibility and natal charts, with page numbers, complete factor explanations, chart tables, planet conditions and unknown-time warnings.
+- JSON downloads contain a versioned snapshot of the inputs and result. Files are named without personal names.
+- Expand/collapse all report explanations. Language switching retains the completed report and entered details in page memory. Refresh clears them.
+- Editing birth details invalidates the old report and cancels a pending download. Failed exports retain the valid on-screen result for retry.
 - No birth details in URLs, cookies, localStorage, sessionStorage or application databases.
 - API responses carry no-store and noindex headers.
 - No account, checkout or paid-report gate has been implemented. `/match/full` is accessible like the original endpoint. Separate free/full endpoints do not constitute payment enforcement.
 
 ## Languages
-All 34 interface messages have an explicit entry in each of 23 catalogs:
+Interface messages have explicit entries in each of 23 catalogs:
 English, Hindi, Tamil, Telugu, Kannada, Malayalam, Marathi, Gujarati, Bengali, Punjabi, Odia, Assamese, Urdu, Nepali, Sanskrit, Konkani, Maithili, Dogri, Sindhi, Kashmiri, Bodo, Manipuri and Santali.
 
 **Translation status:** initial translations, not native-speaker approved. Detailed engine explanations remain English, labelled as such. Proper names and some chart labels remain transliterated. Manipuri currently uses Bengali script, Santali uses Ol Chiki, and Kashmiri/Sindhi use Arabic script. Alternative scripts are not implemented.
@@ -69,6 +72,14 @@ python tests/browser_ui.py
 GitHub Actions builds the real GeoNames database, runs the original engine tests plus HTTP/locale regressions, and exercises calculation, unknown time, language handoff, mobile overflow, RTL, keyboard place search and its failure state in Chromium. Screenshot artifacts use fictional test names. CI also builds the Docker image and runs three sequential Lighthouse audits against an indexable loopback instance, reporting every score and gating the median at 90 for performance, accessibility and SEO. This accounts for shared-runner variance using [Google's guidance](https://developers.google.com/web/tools/lighthouse/variability). Its synthetic scores are not production or field measurements.
 
 ## Deployment
+PDF export uses WeasyPrint 70 with Pango/Harfbuzz and Noto fonts so Indic shaping and RTL text are handled by the renderer. These are included in Docker. For a local Debian/Ubuntu setup, install the native dependencies before exporting:
+```bash
+sudo apt-get install libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 fonts-noto-core fonts-noto-extra
+```
+See the [renderer installation guide](https://doc.courtbouillon.org/weasyprint/stable/first_steps.html) for other systems.
+
+The endpoints are `POST /reports/match.pdf?locale=en` with the same body as `/match/full`, and `POST /reports/chart.pdf?locale=ta&ayanamsa=lahiri` with the same body as `/chart`. Each export recalculates current transit/period notes at the time of download. Personal inputs remain in the POST body. A fixed, autoescaped template generates the PDF in memory, with all renderer network/file URL fetching disabled and a two-render-per-process concurrency cap. Responses are no-store and noindex. Exported PDF/JSON files do contain personal data, so users must protect their downloaded copies. No server report history is implemented.
+
 The included Dockerfile runs FastAPI and serves static assets in one service.
 ```bash
 docker build -t astro .

@@ -41,5 +41,9 @@
   "copy": "لنڪ ڪاپي ڪريو",
   "copied": "لنڪ ڪاپي ٿي ويو",
   "install": "ايپ انسٽال ڪريو",
-  "theme": "ٿيم بدلايو"
+  "theme": "ٿيم بدلايو",
+  "downloadPdf": "PDF ڊائون لوڊ",
+  "downloadJson": "JSON ڊائون لوڊ",
+  "expandAll": "سڀ کوليو",
+  "collapseAll": "سڀ بند ڪريو"
 }

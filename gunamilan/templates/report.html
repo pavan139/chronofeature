@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ t.dir }}"><head><meta charset="utf-8"><title>Astro | {{ title }}</title><meta name="author" content="Astro"><style>{{ css|safe }}</style></head>
+<body>
+<header><div class="brand">astro.</div><p class="meta ltr">{{ generated }} | {{ ayanamsa|title }}</p></header>
+<h1>{{ title }}</h1><p>{{ t.note }}</p>
+<p class="muted" lang="en" dir="ltr">Personal report. Keep this downloaded file private. Interface labels follow your selected language. Detailed calculations and rule explanations below are in English.</p>
+{% if data.accuracy_warning %}<div class="notice"><strong>{{ t.unknown }} - {{ t.review }}</strong><p lang="en" dir="ltr">{{ data.accuracy_warning }}</p></div>{% endif %}
+<h2>{{ t.details }}</h2>
+{% for b in births %}<div class="personal">
+<p class="name" dir="auto">{{ b.name }}</p>
+<p>{{ t.date }}: <span dir="ltr">{{ b.date }}</span> | {{ t.time }}: <span dir="ltr">{{ b.time if b.time else t.unknown }}</span></p>
+<p>{{ t.timezone }}: <span dir="ltr">{{ b.timezone or ('place lookup' if b.place else 'Asia/Kolkata') }}</span></p>
+{% if b.place %}<p>{{ t.place }}: {{ b.place }}</p>{% else %}<p>{{ t.latitude }} / {{ t.longitude }}: <span dir="ltr">{{ b.latitude }} / {{ b.longitude }}</span></p>{% endif %}
+</div>{% endfor %}
+{% if data.place_warning %}<p class="notice ltr">{{ data.place_warning }}</p>{% endif %}
+{% for warning in data.place_warnings or [] %}<p class="notice ltr">{{ warning }}</p>{% endfor %}
+{% if mode == 'match' %}
+<div class="scores" dir="ltr">
+{% if data.ashtakoota %}<div class="score"><p>Ashtakoota</p><div class="value">{{ data.ashtakoota.total }} <small>/ {{ data.ashtakoota.maximum }}</small></div></div>{% endif %}
+{% if data.porutham %}<div class="score"><p>Dasa Porutham</p><div class="value">{{ data.porutham.passed }} <small>/ {{ data.porutham.total }}</small></div></div>{% endif %}
+</div>
+<p class="muted" lang="en" dir="ltr">These are traditional scores, not probabilities of relationship success. Essential checks and exceptions are separate from the total.</p>
+{% for key, heading in [('ashtakoota','Ashtakoota'),('porutham','Dasa Porutham')] %}
+{% set result = data.get(key) %}{% if result %}
+<section class="section" lang="en" dir="ltr"><h2>{{ heading }}</h2><p class="source">DETAILED INTERPRETATION / ENGLISH</p>
+<div class="details"><p>{{ result.verdict }}</p>
+{% for warning in result.essential_failures or result.blocking_doshas or [] %}<p><strong>{{ warning }}</strong></p>{% endfor %}
+</div>
+{% for f in (result.kootas if key == 'ashtakoota' else result.poruthams) %}<article class="factor">
+<h3>{{ f.name }} <span class="points">{{ (f.score|string + ' / ' + f.maximum|string) if key == 'ashtakoota' else ('Matched' if f.passed else 'Needs review') }}</span></h3>
+<p class="muted">Groom: {{ f.groom_attribute }} | Bride: {{ f.bride_attribute }}</p><p>{{ f.explanation }}</p>
+</article>{% endfor %}
+{% for key, value in (result.exceptions or {}).items() %}<div class="details"><h3>{{ key|replace('_',' ')|title }}</h3>{% if value is string %}<p>{{ value }}</p>{% else %}{% for v in value %}<p>{{ v }}</p>{% endfor %}{% endif %}</div>{% endfor %}
+</section>{% endif %}{% endfor %}
+{% if data.doshas %}<section class="section" lang="en" dir="ltr"><h2>Dosha review</h2><p class="source">SOURCE RULES / ENGLISH</p>
+{% for key, d in data.doshas.items() %}<h3>{{ key|replace('_',' ')|title }}</h3>{% if d.summary %}<p>{{ d.summary }}</p>{% endif %}
+{% for who in ['groom','bride'] %}<div class="details"><strong>{{ who|title }}</strong><p>{{ d[who].detail }}</p>{% for note in d[who].cancellations or [] %}<p>{{ note }}</p>{% endfor %}</div>{% endfor %}
+{% endfor %}</section>{% endif %}
+{% endif %}
+{% for chart in charts %}<section class="section"><h2>{{ t.chart }}</h2><p class="report-heading" dir="auto">{{ chart.name }}</p>
+<div lang="en" dir="ltr"><p class="source">SIDEREAL POSITIONS / ENGLISH</p>
+{% if chart.ascendant %}<p>Lagna: {{ chart.ascendant.rashi }} | {{ chart.ascendant.degrees }} | Navamsa: {{ chart.ascendant.navamsa }}</p>{% else %}<p class="notice">Birth time unknown. Ascendant and house numbers are omitted.</p>{% endif %}
+<table><thead><tr><th>Graha</th><th>Rashi</th><th>Degrees</th><th>Nakshatra</th><th>Pada</th><th>Navamsa</th><th>House</th></tr></thead><tbody>
+{% for g in chart.grahas %}<tr><td>{{ g.name }}</td><td>{{ g.rashi }}</td><td>{{ g.degrees }}</td><td>{{ g.nakshatra }}</td><td>{{ g.pada }}</td><td>{{ g.navamsa }}</td><td>{{ g.house if g.house else '-' }}</td></tr>{% endfor %}
+</tbody></table>
+<h3>Planet condition</h3><table><thead><tr><th>Graha</th><th>Dignity</th><th>Retrograde</th><th>Combust</th></tr></thead><tbody>{% for g in chart.grahas %}<tr><td>{{ g.name }}</td><td>{{ g.dignity or '-' }}</td><td>{{ 'Yes' if g.retrograde else 'No' }}</td><td>{{ 'Yes' if g.combust else 'No' }}</td></tr>{% endfor %}</tbody></table>
+{% if chart.dasha %}<h3>Vimshottari</h3><p>{{ chart.dasha.summary }}</p><table class="periods"><thead><tr><th>Mahadasha</th><th>Start</th><th>End</th></tr></thead><tbody>{% for p in chart.dasha.mahadashas %}<tr><td>{{ p.lord }}</td><td>{{ p.start }}</td><td>{{ p.end }}</td></tr>{% endfor %}</tbody></table>{% endif %}
+{% for key, d in (chart.doshas or {}).items() %}<div class="details"><h3>{{ key|replace('_',' ')|title }}</h3><p>{{ d.detail }}</p>{% for note in d.cancellations or [] %}<p>{{ note }}</p>{% endfor %}</div>{% endfor %}
+</div></section>{% endfor %}
+{% if mode == 'match' and data.dasha %}<section lang="en" dir="ltr"><h2>Current Vimshottari periods</h2><p>Groom: {{ data.dasha.groom }}</p><p>Bride: {{ data.dasha.bride }}</p><p class="muted">Sub-period timing follows the supplied engine and has not been independently validated. Groom-only candidate windows are not presented as shared or predicted dates.</p></section>{% endif %}
+<div class="endnote"><p>{{ t.note }}</p><p class="muted" lang="en" dir="ltr">Astro | Swiss Ephemeris | Place data: GeoNames, CC BY 4.0. Ayanamsa: {{ ayanamsa|title }}. Unknown time uses local noon as an approximation. A new export recalculates current-period and transit notes at generation time. No server copy is retained.</p></div>
+</body></html>

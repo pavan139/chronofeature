@@ -24,7 +24,12 @@ Reviewed all original files: ephemeris.py, doshas.py, geocode.py, build_places.p
 8. **Fonts:** the interface uses local/system font fallbacks. Devices without an appropriate script font may need a self-hosted Noto font bundle. CI screenshots do not certify glyph coverage on every device.
 
 ## Validation scope
+PDF and JSON export now complete the download workflow. Real PDF checks cover English, Hindi, Tamil, Urdu and Santali, including render inspection, page bounds, download headers, invalid inputs, escaped markup, denied renderer resources and concurrency recovery. Catalog/template coverage includes all 23 locales. Browser checks download both report types, retain results across a locale switch, exercise expand/collapse, recover from failed PDF export and invalidate stale reports on edits. This does not constitute native-speaker review of translations.
+
 The workflow performs engine/HTTP regressions and real Chromium flows, with screenshot artifacts. Lighthouse audits are synthetic measurements of a local CI instance, not field Core Web Vitals. No independently verified astrology certification, guaranteed SEO result or public deployment is claimed. Check the PR's CI status for actual execution outcomes.
+
+## Remaining product scope
+Account login, saved report history, payment collection, practitioner booking, full narrative translation and public hosting are not implemented. They require product choices, credentials or privacy/retention decisions beyond report export. A web-app manifest is present, but offline calculation and cross-platform installation have not been certified. Do not label this as a complete offline PWA. The existing scoring and dasha findings above remain unchanged.
 
 ## SEO and publication
 Indexing is off by default. Set SITE_URL and INDEXABLE only for a deliberate public deployment, then INDEX_LOCALES only for reviewed languages. A private GitHub repository controls source access, not visitors to a web server. Public indexing requires a publicly accessible site.

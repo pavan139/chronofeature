@@ -1,11 +1,8 @@
 """
 HTTP layer.
 
-Endpoint design follows the funnel rather than the data model. `/match/free`
-returns enough to be worth forwarding to a family WhatsApp group, which is the
-entire distribution plan; `/match/full` returns everything the paid report is
-built from. Splitting them in the API rather than in the frontend means the
-paywall cannot be bypassed by reading the network tab.
+Both matching endpoints are public and have no payment enforcement. PDF
+exports use the same validated inputs and calculations as interactive reports.
 
 Run locally:
     uvicorn gunamilan.api:app --reload
@@ -17,7 +14,7 @@ import datetime as dt
 from typing import Literal
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from fastapi.responses import JSONResponse
+from fastapi.responses import Response
 
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field, field_validator
@@ -55,7 +52,7 @@ class BirthInput(BaseModel):
         None, description="Local birth time. Omit if unknown; the ascendant is then skipped."
     )
     place: str | None = Field(
-        None, description="Place name, resolved offline. Use instead of coordinates."
+        None, min_length=2, max_length=200, description="Place name, resolved offline. Use instead of coordinates."
     )
     latitude: float | None = Field(None, ge=-90, le=90)
     longitude: float | None = Field(None, ge=-180, le=180)
@@ -291,7 +288,7 @@ def match_free(req: MatchRequest) -> dict:
 
 @app.post("/match/full")
 def match_full(req: MatchRequest) -> dict:
-    """Everything the paid report is built from."""
+    """Full public calculation. No authentication or payment gate is implied."""
     result = match_free(req)
 
     groom_data, _ = req.groom.resolve()
@@ -328,6 +325,23 @@ def match_full(req: MatchRequest) -> dict:
     }
     result["full_charts"] = {"groom": _chart_dict(groom), "bride": _chart_dict(bride)}
     return result
+
+
+@app.post("/reports/match.pdf", response_class=Response)
+def match_pdf(req: MatchRequest, locale: str = "en"):
+    from .reports import render_pdf, validate_locale
+    validate_locale(locale)
+    result = match_full(req)
+    return render_pdf(result, [req.groom.model_dump(mode="json"), req.bride.model_dump(mode="json")],
+                      "match", locale, req.ayanamsa)
+
+
+@app.post("/reports/chart.pdf", response_class=Response)
+def chart_pdf(birth: BirthInput, locale: str = "en", ayanamsa: str = "lahiri"):
+    from .reports import render_pdf, validate_locale
+    validate_locale(locale)
+    result = chart_endpoint(birth, ayanamsa)
+    return render_pdf(result, [birth.model_dump(mode="json")], "chart", locale, ayanamsa)
 
 
 # Public documents are rendered on the server. Personal results are POST-only.

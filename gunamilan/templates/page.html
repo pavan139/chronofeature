@@ -117,6 +117,12 @@
   </div>
   <section id="reading" class="reading" aria-labelledby="result-heading" tabindex="-1" hidden>
     <div class="report-top"><div><div class="eyebrow">ASTRO / {{ t.result }}</div><h2 id="result-heading">{{ t.result }}</h2></div><div class="report-actions"><button id="share-result" class="secondary">{{ t.share }}</button><button id="edit" class="secondary">{{ t.edit }}</button><button id="print" class="primary">{{ t.print }}</button></div></div>
+    <div class="report-tools" role="group" aria-label="{{ t.result }}">
+      <button id="download-pdf" type="button" class="primary">{{ t.downloadPdf }}</button>
+      <button id="download-json" type="button" class="secondary">{{ t.downloadJson }}</button>
+      <button id="toggle-details" type="button" class="secondary" aria-expanded="false" aria-controls="report-content">{{ t.expandAll }}</button>
+    </div>
+    <p id="export-error" class="form-error" role="alert" hidden></p>
     <div id="report-content"></div>
     <p class="report-note">{{ t.note }}</p>
   </section>
@@ -144,5 +150,5 @@
 </main>
 <footer><a class="brand" href="/{{ lang }}/">astro<span class="brand-dot">.</span></a><p>{{ t.privacy }}</p><a href="https://www.geonames.org/" rel="noreferrer">GeoNames · CC BY 4.0</a></footer>
 <datalist id="timezones"><option value="Asia/Kolkata"><option value="Asia/Kathmandu"><option value="Asia/Dhaka"><option value="Asia/Colombo"><option value="Asia/Dubai"><option value="Europe/London"><option value="America/New_York"><option value="America/Los_Angeles"><option value="Australia/Sydney"><option value="UTC"></datalist>
-<div id="messages" hidden>{% for key in ['error','unavailable','loading','calculate','result','score','passed','review','details','unknown','note','groom','bride','chart','empty','share','copy','copied','install','theme'] %}<span data-key="{{ key }}">{{ t[key] }}</span>{% endfor %}</div>
+<div id="messages" hidden>{% for key in ['error','unavailable','loading','calculate','result','score','passed','review','details','unknown','note','groom','bride','chart','empty','share','copy','copied','install','theme','downloadPdf','downloadJson','expandAll','collapseAll'] %}<span data-key="{{ key }}">{{ t[key] }}</span>{% endfor %}</div>
 </body></html>

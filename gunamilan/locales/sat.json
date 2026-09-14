@@ -41,5 +41,9 @@
   "copy": "ᱞᱤᱝᱠ ᱱᱚᱠᱚᱞ ᱢᱮ",
   "copied": "ᱞᱤᱝᱠ ᱱᱚᱠᱚᱞ ᱮᱱᱟ",
   "install": "ᱮᱯ ᱵᱚᱦᱟᱞ ᱢᱮ",
-  "theme": "ᱛᱷᱤᱢ ᱵᱚᱫᱚᱞ ᱢᱮ"
+  "theme": "ᱛᱷᱤᱢ ᱵᱚᱫᱚᱞ ᱢᱮ",
+  "downloadPdf": "PDF ᱰᱟᱣᱱᱞᱚᱰ ᱢᱮ",
+  "downloadJson": "JSON ᱰᱟᱣᱱᱞᱚᱰ ᱢᱮ",
+  "expandAll": "ᱡᱷᱚᱛᱚ ᱡᱷᱤᱡ ᱢᱮ",
+  "collapseAll": "ᱡᱷᱚᱛᱚ ᱵᱚᱱᱫᱚ ᱢᱮ"
 }

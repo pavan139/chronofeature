@@ -1,6 +1,6 @@
 (() => {
   "use strict";
-  let generation = 0, cleanup = () => {}, capture = () => ({}), installPrompt = null;
+  let generation = 0, navigation = 0, cleanup = () => {}, capture = () => ({}), installPrompt = null;
   if (matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.dataset.theme = "dark";
   window.addEventListener("beforeinstallprompt", event => {
     event.preventDefault(); installPrompt = event;
@@ -24,7 +24,9 @@
     const button = form.querySelector('[type="submit"]'), label = button.querySelector(".submit-label");
     const locale = document.documentElement.lang, view = document.body.dataset.view;
     const shareStatus = document.querySelector("#share-status"), installButton = document.querySelector("#install-app");
-    let shareSummary = "";
+    let shareSummary = "", lastReport = null, lastRequest = null, lastAyanamsa = "lahiri", calculatedAt = null, pdfController;
+    const pdfButton = document.querySelector("#download-pdf"), exportError = document.querySelector("#export-error");
+    const toggleDetails = document.querySelector("#toggle-details"), objectUrls = new Set();
     const controllers = new Set(), timers = new Set(), selected = new Map();
     let resultController;
     const val = name => form.elements.namedItem(name);
@@ -34,7 +36,7 @@
       try {
         if (navigator.share) await navigator.share(data);
         else {
-          await navigator.clipboard.writeText(data.url);
+          await navigator.clipboard.writeText(data.text + "\n" + data.url);
           shareStatus.textContent = t.copied;
           const timer = setTimeout(() => shareStatus.textContent = "", 2600); timers.add(timer);
         }
@@ -45,6 +47,7 @@
     document.querySelector("#share-page").addEventListener("click", () => share());
     document.querySelector("#share-result").addEventListener("click", () => share(shareSummary || document.title));
     document.querySelector("#theme-toggle").setAttribute("aria-pressed", String(document.documentElement.dataset.theme === "dark"));
+    document.querySelector('meta[name="theme-color"]').content = document.documentElement.dataset.theme === "dark" ? "#0d1f24" : "#142b32";
     document.querySelector("#theme-toggle").addEventListener("click", () => {
       const dark = document.documentElement.dataset.theme !== "dark";
       if (dark) document.documentElement.dataset.theme = "dark";
@@ -65,16 +68,23 @@
       try { return new Intl.DateTimeFormat(locale, {dateStyle: "medium"}).format(new Date(value + "T12:00:00")); }
       catch { return value; }
     };
-    cleanup = () => { controllers.forEach(c => c.abort("navigation")); timers.forEach(clearTimeout); };
+    cleanup = () => {
+      controllers.forEach(c => c.abort("navigation")); timers.forEach(clearTimeout);
+      objectUrls.forEach(url => URL.revokeObjectURL(url)); objectUrls.clear();
+    };
     capture = () => ({
       fields: [...form.elements].filter(el => el.name).map(el => [el.name, el.type === "checkbox" ? el.checked : el.value]),
-      selected: [...selected], open: [...form.querySelectorAll(".coordinates")].map(el => el.open)
+      selected: [...selected], open: [...form.querySelectorAll(".coordinates")].map(el => el.open),
+      view, report: lastReport, request: lastRequest, ayanamsa: lastAyanamsa, calculatedAt
     });
     function invalidate() {
       reading.hidden = true;
+      lastReport = null; lastRequest = null; calculatedAt = null; shareSummary = "";
+      if (pdfController) pdfController.abort("edit");
       if (resultController) resultController.abort("edit");
     }
     form.addEventListener("input", invalidate);
+    form.addEventListener("change", invalidate);
     const today = new Date();
     const maxDate = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2,"0") + "-" + String(today.getDate()).padStart(2,"0");
     const closeMenus = () => document.querySelectorAll(".language-menu").forEach(el => el.open = false);
@@ -248,6 +258,8 @@
         body.append(tr);
       }
       table.append(body); wrapper.append(table); output.append(wrapper);
+      sourceDetails(output, "Planet condition", (chart.grahas || []).map(g =>
+        g.name + ": " + (g.dignity || "Not specified") + "; retrograde: " + (g.retrograde ? "Yes" : "No") + "; combust: " + (g.combust ? "Yes" : "No")));
       if (chart.ascendant) sourceDetails(output, "Lagna", [chart.ascendant.rashi + " · " + chart.ascendant.degrees]);
       if (chart.dasha?.mahadashas) {
         const timeline = node("ol", null, "dasha-timeline");
@@ -258,36 +270,89 @@
       }
       if (chart.doshas) for (const d of Object.values(chart.doshas)) sourceDetails(output,d.name,[d.detail,...d.cancellations]);
     }
+    function renderRecord(data, body) {
+      output.replaceChildren(); exportError.hidden = true;
+      if (data.accuracy_warning) {
+        output.append(node("p", t.unknown + " · " + t.review, "notice"));
+        sourceDetails(output,t.details,[data.accuracy_warning]);
+      }
+      if (view === "chart") renderChart(data); else renderMatch(data);
+      shareSummary = [...output.querySelectorAll(".score-card")].map(card =>
+        card.querySelector(".score-label").textContent + " " + card.querySelector(".score-value").textContent.replace(/\s+/g, " ").trim()
+      ).join(" · ") || document.title;
+      reading.hidden = false;
+      toggleDetails.textContent = t.expandAll; toggleDetails.setAttribute("aria-expanded", "false");
+      document.querySelector("#result-heading").textContent = view === "chart" ? body.name : body.groom.name + " & " + body.bride.name;
+    }
+    function saveBlob(blob, filename) {
+      const url = URL.createObjectURL(blob); objectUrls.add(url);
+      const link = node("a"); link.href = url; link.download = filename;
+      document.body.append(link); link.click(); link.remove();
+      const timer = setTimeout(() => { URL.revokeObjectURL(url); objectUrls.delete(url); timers.delete(timer); }, 60000);
+      timers.add(timer);
+    }
+    pdfButton.addEventListener("click", async () => {
+      if (!lastRequest || pdfController) return;
+      const own = new AbortController(); pdfController = own; controllers.add(own);
+      const timeout = setTimeout(() => own.abort("timeout"), 60000); timers.add(timeout);
+      pdfButton.disabled = true; pdfButton.textContent = t.loading; pdfButton.setAttribute("aria-busy", "true");
+      exportError.hidden = true;
+      try {
+        const kind = view === "chart" ? "chart" : "match";
+        const query = new URLSearchParams({locale, ayanamsa:lastAyanamsa});
+        const response = await fetch("/reports/" + kind + ".pdf?" + query, {
+          method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(lastRequest),
+          signal:own.signal, cache:"no-store"
+        });
+        if (!response.ok || !response.headers.get("content-type")?.startsWith("application/pdf")) throw new Error("PDF export");
+        const blob = await response.blob();
+        if (version === generation && !own.signal.aborted) saveBlob(blob, "astro-" + kind + ".pdf");
+      } catch (err) {
+        if (version === generation && (!own.signal.aborted || own.signal.reason === "timeout")) {
+          exportError.textContent = t.error; exportError.hidden = false;
+        }
+      } finally {
+        clearTimeout(timeout); timers.delete(timeout); controllers.delete(own);
+        if (pdfController === own) pdfController = null;
+        pdfButton.disabled = false; pdfButton.textContent = t.downloadPdf; pdfButton.removeAttribute("aria-busy");
+      }
+    });
+    document.querySelector("#download-json").addEventListener("click", () => {
+      if (!lastReport || !lastRequest) return;
+      const file = {schemaVersion:1, application:"Astro", view, locale, calculatedAt, ayanamsa:lastAyanamsa,
+        inputs:lastRequest, report:lastReport};
+      saveBlob(new Blob([JSON.stringify(file,null,2)], {type:"application/json"}), "astro-" + (view === "chart" ? "chart" : "match") + ".json");
+    });
+    toggleDetails.addEventListener("click", () => {
+      const items = [...output.querySelectorAll("details")], open = items.some(el => !el.open);
+      items.forEach(el => el.open = open);
+      toggleDetails.textContent = open ? t.collapseAll : t.expandAll;
+      toggleDetails.setAttribute("aria-expanded", String(open));
+    });
+    if (saved?.report && saved?.request && saved.view === view) {
+      lastReport = saved.report; lastRequest = saved.request; lastAyanamsa = saved.ayanamsa; calculatedAt = saved.calculatedAt;
+      renderRecord(lastReport, lastRequest);
+    }
     form.addEventListener("submit", async event => {
-      event.preventDefault(); error.hidden = true; reading.hidden = true;
+      event.preventDefault(); error.hidden = true; invalidate();
       if (!form.reportValidity()) return;
       let body;
       try {
         const groom = personData("groom");
         body = view === "chart" ? groom : {groom,bride:personData("bride"),system:"both",ayanamsa:val("ayanamsa").value};
       } catch (err) { showError(t.error); return; }
+      const calculationAyanamsa = val("ayanamsa").value;
       resultController = new AbortController(); const own = resultController; controllers.add(own);
       const timeout = setTimeout(() => own.abort("timeout"), 30000); timers.add(timeout);
       button.disabled = true; label.textContent = t.loading; form.setAttribute("aria-busy", "true");
       try {
-        const endpoint = view === "chart" ? "/chart?ayanamsa=" + encodeURIComponent(val("ayanamsa").value) : "/match/full";
+        const endpoint = view === "chart" ? "/chart?ayanamsa=" + encodeURIComponent(calculationAyanamsa) : "/match/full";
         const response = await fetch(endpoint, {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body),signal:own.signal,cache:"no-store"});
         if (!response.ok) throw new Error("response");
         const data = await response.json();
-        if (version !== generation) return;
-        output.replaceChildren();
-        if (data.accuracy_warning) {
-          output.append(node("p", t.unknown + " · " + t.review, "notice"));
-          sourceDetails(output,t.details,[data.accuracy_warning]);
-        }
-        if (view === "chart") renderChart(data); else renderMatch(data);
-        shareSummary = [...output.querySelectorAll(".score-card")].map(card => {
-          const name = card.querySelector(".score-label")?.textContent || "";
-          const score = card.querySelector(".score-value")?.textContent.replace(/\s+/g, " ").trim() || "";
-          return name + " " + score;
-        }).filter(Boolean).join(" · ") || document.title;
-        reading.hidden = false;
-        document.querySelector("#result-heading").textContent = view === "chart" ? body.name : body.groom.name + " & " + body.bride.name;
+        if (version !== generation || own.signal.aborted) return;
+        lastReport = data; lastRequest = body; lastAyanamsa = calculationAyanamsa; calculatedAt = new Date().toISOString();
+        renderRecord(data, body);
         reading.focus({preventScroll:true});
         reading.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",block:"start"});
       } catch (err) {
@@ -298,13 +363,14 @@
       }
     });
     form.addEventListener("reset", () => {
-      cleanup(); selected.clear(); output.replaceChildren(); reading.hidden = true; error.hidden = true;
+      invalidate(); cleanup(); selected.clear(); output.replaceChildren(); error.hidden = true; exportError.hidden = true;
       form.querySelectorAll(".place-status").forEach(el => el.textContent = "");
       form.querySelectorAll(".coordinates,.settings").forEach(el => el.open = false);
       form.querySelectorAll(".suggestions").forEach(el => el.hidden = true);
+      form.querySelectorAll('[role="combobox"]').forEach(el => { el.setAttribute("aria-expanded", "false"); el.removeAttribute("aria-activedescendant"); });
       queueMicrotask(() => { form.querySelectorAll('[type="time"]').forEach(el => {el.disabled = false; el.required = true;}); });
     });
-    document.querySelector("#edit").addEventListener("click", () => { val("groom-name").focus(); form.scrollIntoView({block:"start",behavior:"smooth"}); });
+    document.querySelector("#edit").addEventListener("click", () => { val("groom-name").focus(); form.scrollIntoView({block:"start",behavior:matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"}); });
     let printOpen = [];
     const beforePrint = () => {
       printOpen = [...reading.querySelectorAll("details")].map(el => [el,el.open]);
@@ -320,12 +386,14 @@
     document.body.addEventListener("keydown", event => { if (event.key === "Escape") closeMenus(); });
   }
   async function navigate(url,push) {
-    const saved = capture();
+    const nav = ++navigation;
     try {
       const response = await fetch(url,{headers:{"Accept":"text/html"}});
       if (!response.ok) throw new Error("language");
       const doc = new DOMParser().parseFromString(await response.text(),"text/html");
+      if (nav !== navigation) return;
       if (!doc.querySelector("#birth-form")) throw new Error("language");
+      const saved = capture();
       cleanup();
       document.documentElement.lang = doc.documentElement.lang;
       document.documentElement.dir = doc.documentElement.dir;
@@ -335,9 +403,12 @@
         doc.head.querySelectorAll(selector).forEach(el => document.head.append(document.importNode(el,true)));
       }
       document.body.replaceWith(document.importNode(doc.body,true));
+      const structured = document.head.querySelector('script[type="application/ld+json"]');
+      if (structured) structured.textContent = doc.head.querySelector('script[type="application/ld+json"]').textContent;
       if (push) history.pushState(null,"",url);
       boot(saved);
     } catch {
+      if (nav !== navigation) return;
       const error = document.querySelector("#form-error");
       error.textContent = document.querySelector('[data-key="error"]').textContent; error.hidden = false; error.focus();
     }

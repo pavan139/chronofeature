@@ -41,5 +41,9 @@
   "copy": "दुवो नक्कल करात",
   "copied": "दुवो नक्कल जालो",
   "install": "अॅप बसयात",
-  "theme": "रूप बदलात"
+  "theme": "रूप बदलात",
+  "downloadPdf": "PDF डावनलोड करात",
+  "downloadJson": "JSON डावनलोड करात",
+  "expandAll": "सगळें उगडात",
+  "collapseAll": "सगळें बंद करात"
 }

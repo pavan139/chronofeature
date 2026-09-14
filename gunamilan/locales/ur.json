@@ -41,5 +41,9 @@
   "copy": "لنک کاپی کریں",
   "copied": "لنک کاپی ہو گیا",
   "install": "ایپ انسٹال کریں",
-  "theme": "تھیم بدلیں"
+  "theme": "تھیم بدلیں",
+  "downloadPdf": "PDF ڈاؤن لوڈ",
+  "downloadJson": "JSON ڈاؤن لوڈ",
+  "expandAll": "سب کھولیں",
+  "collapseAll": "سب بند کریں"
 }

@@ -52,7 +52,7 @@ def install_web(app):
             "img-src 'self' data:; font-src 'self'; connect-src 'self'; "
             "object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
         )
-        if request.method == "POST" or request.url.path.startswith(("/places", "/chart", "/match", "/health", "/docs", "/openapi", "/redoc")):
+        if request.method == "POST" or request.url.path.startswith(("/reports", "/places", "/chart", "/match", "/health", "/docs", "/openapi", "/redoc")):
             response.headers["Cache-Control"] = "no-store"
             response.headers["X-Robots-Tag"] = "noindex, nofollow"
         elif request.url.path.startswith("/static/"):
@@ -81,7 +81,7 @@ def install_web(app):
     def robots():
         if not index_locales():
             return PlainTextResponse("User-agent: *\nDisallow: /\n")
-        lines = ["User-agent: *", "Disallow: /match/", "Disallow: /chart",
+        lines = ["User-agent: *", "Disallow: /reports/", "Disallow: /match/", "Disallow: /chart",
                  "Disallow: /places", "Disallow: /docs", "Disallow: /openapi.json",
                  "Disallow: /redoc", "Disallow: /health",
                  "Sitemap: " + site_origin() + "/sitemap.xml"]

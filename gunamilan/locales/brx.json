@@ -41,5 +41,9 @@
   "copy": "लिंकखौ कपि खालाम",
   "copied": "लिंक कपि जाबाय",
   "install": "एप इनष्टल खालाम",
-  "theme": "थिम सोलाय"
+  "theme": "थिम सोलाय",
+  "downloadPdf": "PDF डाउनलड खालाम",
+  "downloadJson": "JSON डाउनलड खालाम",
+  "expandAll": "गासैखौ खेवनाय",
+  "collapseAll": "गासैखौ बन्द खालाम"
 }

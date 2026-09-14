@@ -19,6 +19,8 @@ jobs:
           python-version: '3.12'
       - name: Install application and test dependencies
         run: pip install -e '.[test]'
+      - name: Install PDF renderer and script fonts
+        run: sudo apt-get update && sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 fonts-noto-core fonts-noto-extra
       - name: Cache offline places
         uses: actions/cache@v4
         with:
@@ -35,10 +37,9 @@ jobs:
         run: |
           docker build -t astro-ci .
           docker run --rm astro-ci python -c "from gunamilan.api import app; from gunamilan.ephemeris import BirthData, cast_chart; import datetime as d; print(cast_chart(BirthData('CI',d.date(2000,1,1),d.time(12),17.385,78.4867)).moon.rashi_name)"
+          docker run --rm astro-ci python -c "from gunamilan.api import BirthInput, chart_pdf; b=BirthInput(name='CI',date='2000-01-01',time='12:00',latitude=17.385,longitude=78.4867); r=chart_pdf(b,locale='ta'); assert r.body.startswith(b'%PDF-'); print('Container PDF bytes:',len(r.body))"
       - name: Install browser
         run: python -m playwright install --with-deps chromium
-      - name: Install script fonts
-        run: sudo apt-get update && sudo apt-get install -y fonts-noto-core fonts-noto-extra
       - name: Browser integration and screenshots
         run: |
           uvicorn gunamilan.api:app --host 127.0.0.1 --port 8000 > /tmp/astro-server.log 2>&1 &
@@ -61,7 +62,7 @@ jobs:
           python - <<'PY'
           import base64
           from pathlib import Path
-          for name in ["desktop.png", "desktop-dark.png", "report-hindi.png", "mobile-ta.png", "mobile-ur.png"]:
+          for name in ["report-tools.png", "pdf-en.png", "pdf-ta.png", "pdf-ur.png", "pdf-sat.png", "pdf-en-last.png", "pdf-match-1.png"]:
               p = Path("test-results") / name
               if p.exists():
                   print("ASTRO_IMAGE_" + name + "=" + base64.b64encode(p.read_bytes()).decode())

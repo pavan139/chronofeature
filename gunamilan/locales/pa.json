@@ -41,5 +41,9 @@
   "copy": "ਲਿੰਕ ਕਾਪੀ ਕਰੋ",
   "copied": "ਲਿੰਕ ਕਾਪੀ ਹੋ ਗਿਆ",
   "install": "ਐਪ ਇੰਸਟਾਲ ਕਰੋ",
-  "theme": "ਥੀਮ ਬਦਲੋ"
+  "theme": "ਥੀਮ ਬਦਲੋ",
+  "downloadPdf": "PDF ਡਾਊਨਲੋਡ ਕਰੋ",
+  "downloadJson": "JSON ਡਾਊਨਲੋਡ ਕਰੋ",
+  "expandAll": "ਸਾਰੇ ਖੋਲ੍ਹੋ",
+  "collapseAll": "ਸਾਰੇ ਬੰਦ ਕਰੋ"
 }

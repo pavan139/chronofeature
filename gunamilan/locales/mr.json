@@ -41,5 +41,9 @@
   "copy": "लिंक कॉपी करा",
   "copied": "लिंक कॉपी झाली",
   "install": "ॲप इंस्टॉल करा",
-  "theme": "थीम बदला"
+  "theme": "थीम बदला",
+  "downloadPdf": "PDF डाउनलोड करा",
+  "downloadJson": "JSON डाउनलोड करा",
+  "expandAll": "सर्व उघडा",
+  "collapseAll": "सर्व बंद करा"
 }

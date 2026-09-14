@@ -41,5 +41,9 @@
   "copy": "لنک کاپی کٔریو",
   "copied": "لنک کاپی گوو",
   "install": "ایپ انسٹال کٔریو",
-  "theme": "تھیم بدلٲویو"
+  "theme": "تھیم بدلٲویو",
+  "downloadPdf": "PDF ڈاؤن لوڈ کٔریو",
+  "downloadJson": "JSON ڈاؤن لوڈ کٔریو",
+  "expandAll": "سٲری کھولیو",
+  "collapseAll": "سٲری بند کٔریو"
 }

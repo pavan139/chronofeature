@@ -41,5 +41,9 @@
   "copy": "ଲିଙ୍କ କପି କରନ୍ତୁ",
   "copied": "ଲିଙ୍କ କପି ହେଲା",
   "install": "ଆପ୍ ଇନଷ୍ଟଲ୍ କରନ୍ତୁ",
-  "theme": "ଥିମ୍ ବଦଳାନ୍ତୁ"
+  "theme": "ଥିମ୍ ବଦଳାନ୍ତୁ",
+  "downloadPdf": "PDF ଡାଉନଲୋଡ୍",
+  "downloadJson": "JSON ଡାଉନଲୋଡ୍",
+  "expandAll": "ସବୁ ଖୋଲନ୍ତୁ",
+  "collapseAll": "ସବୁ ବନ୍ଦ କରନ୍ତୁ"
 }

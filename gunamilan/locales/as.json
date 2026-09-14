@@ -41,5 +41,9 @@
   "copy": "লিংক কপি কৰক",
   "copied": "লিংক কপি হ’ল",
   "install": "এপ ইনষ্টল কৰক",
-  "theme": "থীম সলনি কৰক"
+  "theme": "থীম সলনি কৰক",
+  "downloadPdf": "PDF ডাউনলোড",
+  "downloadJson": "JSON ডাউনলোড",
+  "expandAll": "সকলো খোলক",
+  "collapseAll": "সকলো বন্ধ কৰক"
 }
