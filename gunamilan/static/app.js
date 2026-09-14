@@ -82,7 +82,7 @@
       fields: [...form.elements].filter(el => el.name).map(el => [el.name, el.type === "checkbox" ? el.checked : el.value]),
       selected: [...selected], open: [...form.querySelectorAll(".coordinates")].map(el => el.open),
       view, report: lastReport, request: lastRequest, ayanamsa: lastAyanamsa, calculatedAt,
-      step, sample, returnToReview, showingReport: !reading.hidden
+      step, sample, returnToReview, showingReport: !reading.hidden, checklist: explorer.capture()
     });
     function forgetUndo() {
       resetSnapshot = null; resetStatus.hidden = true; clearTimeout(resetTimer);
@@ -439,6 +439,7 @@
       }
       if (view === "chart") renderChart(data); else renderMatch(data);
       output.append(explorer.nextSteps(view === "chart"), explorer.provenance(data));
+      explorer.reportNavigation(output);
       shareSummary = [...output.querySelectorAll(".score-card")].map(card =>
         card.querySelector(".score-label").textContent + " " + card.querySelector(".score-value").textContent.replace(/\s+/g, " ").trim()
       ).join(" · ") || document.title;
@@ -500,6 +501,7 @@
     if (saved?.report && saved?.request && saved.view === view) {
       lastReport = saved.report; lastRequest = saved.request; lastAyanamsa = saved.ayanamsa; calculatedAt = saved.calculatedAt;
       renderRecord(lastReport, lastRequest);
+      explorer.restore(saved.checklist);
       if (!saved.showingReport) showStep(step, false);
     }
     form.addEventListener("submit", async event => {
@@ -560,7 +562,7 @@
       const snapshot = resetSnapshot; forgetUndo(); restoreFields(snapshot);
       lastReport = snapshot.report; lastRequest = snapshot.request; lastAyanamsa = snapshot.ayanamsa; calculatedAt = snapshot.calculatedAt;
       showStep(snapshot.step);
-      if (lastReport && lastRequest && snapshot.showingReport) { renderRecord(lastReport, lastRequest); reading.focus(); }
+      if (lastReport && lastRequest && snapshot.showingReport) { renderRecord(lastReport, lastRequest); explorer.restore(snapshot.checklist); reading.focus(); }
     });
     document.querySelector("#edit").addEventListener("click", () => showStep(people.length));
     let printOpen = [], printHidden = [];

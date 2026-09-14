@@ -50,3 +50,29 @@ html[data-theme=dark] input,html[data-theme=dark] select,html[data-theme=dark] .
 /* Keep the birthplace popup outside the card edge and offscreen skip links unpainted. */
 .input-panel{overflow:visible}.input-panel>.section-title{border-radius:var(--radius) var(--radius) 0 0}.arrow{color:inherit}
 .skip:not(:focus){clip-path:inset(50%);width:1px;height:1px;overflow:hidden;white-space:nowrap}.skip:focus{clip-path:none;width:auto;height:auto;overflow:visible;white-space:normal}
+/* Small, finite interaction feedback. Never animate continuously or intercept scrolling. */
+.report-navigation{display:flex;flex-wrap:wrap;gap:.5rem;margin:0 0 1.3rem;padding:1rem;border:1px solid var(--line);border-radius:1rem;background:var(--white)}
+.report-navigation button{min-height:44px;padding:.55rem .85rem;border:1px solid var(--line);border-radius:99px;background:var(--paper);color:var(--ink);font:inherit;font-size:.8rem;overflow-wrap:anywhere;max-width:100%}
+.report-navigation button:hover{background:var(--copper-light);border-color:var(--copper)}
+.reading-preferences{margin:1.2rem 0 0;padding:1rem;border:1px solid var(--line);border-radius:1rem;min-width:0}
+.reading-preferences legend{padding-inline:.4rem;font-weight:600}.reading-preferences label{display:flex;align-items:center;gap:.7rem;min-height:44px;font-size:.9rem}.reading-preferences input{accent-color:var(--copper);width:1.1rem;height:1.1rem;flex-shrink:0}.reading-preferences small{display:block;color:var(--muted)}
+.next-steps progress{display:block;width:100%;height:.5rem;accent-color:var(--copper);border:0;border-radius:99px;overflow:hidden}
+.next-steps progress::-webkit-progress-bar{background:var(--line)}.next-steps progress::-webkit-progress-value{background:var(--copper)}.next-steps progress::-moz-progress-bar{background:var(--copper)}
+.checklist-status{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.85rem}
+.next-steps label{min-height:44px;border-radius:.5rem}.next-steps label:has(input:checked){background:var(--copper-light)}
+.report-section,.analysis-overview,.chart-explorer,.next-steps{scroll-margin-block:1rem}
+html[data-large-text=true] #reading :is(p,li,td,th,dd,dt,label,.definition,.chart-caption){font-size:1.125rem;line-height:1.8}
+:is(.report-navigation button,.help-term,.planet-buttons button,.next-steps input,.reading-preferences input):focus-visible{outline:3px solid var(--focus-ring);outline-offset:3px}
+@media(pointer:coarse){.help-button{inline-size:44px;block-size:44px;min-width:44px;min-height:44px}.chart-highlights h4{padding-inline-end:2.3rem}.score-label{padding-inline-end:2rem}}
+@media(prefers-reduced-motion:no-preference){
+  .report-navigation button,.next-steps label,.planet-buttons button{transition:background-color 160ms ease,border-color 160ms ease,transform 120ms ease}
+  .report-navigation button:active,.planet-buttons button:active{transform:scale(.98)}
+  .report-section[open]>.report-section-content,.factor[open]>.definition{animation:studio-in 180ms ease both}
+  .next-steps progress::-webkit-progress-value{transition:width 180ms ease}
+  .flow-progress [data-complete=true] .step-number{animation:step-confirm 180ms ease both}
+  @keyframes step-confirm{from{transform:scale(.9)}to{transform:scale(1)}}
+}
+html[data-quiet=true] *,html[data-quiet=true] *::before,html[data-quiet=true] *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media(forced-colors:active){.report-navigation button,.planet-buttons button,.help-term,.next-steps label:has(input:checked){border:1px solid ButtonText}.planet-buttons button[aria-pressed=true],.help-term[aria-pressed=true]{outline:2px solid Highlight;outline-offset:-3px}.chart-ring,.chart-spoke{stroke:CanvasText}.chart-planet,.chart-planet.selected{fill:CanvasText}.chart-ray{stroke:Highlight}.chart-sign,.chart-center,.chart-center-caption{fill:CanvasText}}
+@media print{.report-navigation,.reading-preferences{display:none!important}}

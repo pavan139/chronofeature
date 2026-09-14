@@ -21,6 +21,13 @@ with sync_playwright() as playwright:
     help_button.click()
     assert page.locator("#help-dialog").is_visible()
     assert page.locator("#help-search").evaluate("e => e === document.activeElement")
+    page.locator("#help-search").press("ArrowDown")
+    assert page.locator("#help-results button").first.evaluate("e => e === document.activeElement")
+    page.keyboard.press("End")
+    assert page.locator("#help-results button").last.evaluate("e => e === document.activeElement")
+    page.locator('[data-preference="quiet"]').check()
+    assert page.locator("#help-dialog").evaluate("e => getComputedStyle(e).animationName") == "none"
+    page.locator('[data-preference="largeText"]').check()
     page.locator("#help-search").fill("What does Nadi mean?")
     assert "Nadi" in page.locator("#help-topic h3").inner_text()
     page.screenshot(animations="disabled", path=str(ARTIFACTS / "studio-help.png"))
@@ -74,6 +81,13 @@ with sync_playwright() as playwright:
     assert page.locator(".workspace").is_hidden()
     assert page.locator(".report-section[open]").count() == 0
     assert page.locator(".analysis-overview").is_visible()
+    assert page.locator(".report-navigation button").count() >= 5
+    page.locator(".report-navigation button").last.click()
+    assert page.locator(".next-steps h3").evaluate("e => e === document.activeElement")
+    page.locator(".next-steps input").first.check()
+    assert page.locator(".checklist-status").inner_text() == "1 of 4 complete"
+    assert page.locator(".next-steps progress").get_attribute("value") == "1"
+    page.locator(".report-navigation button").first.click()
     page.locator(".insight-link").first.click()
     assert page.locator(".report-section[open]").count() == 1
     assert page.locator(".factor[open] .definition").is_visible()
@@ -100,6 +114,10 @@ with sync_playwright() as playwright:
     page.wait_for_url("**/ta/")
     assert page.locator("#reading").is_visible()
     assert page.locator(".score-value").all_text_contents() == score_before
+    assert page.locator(".next-steps input").first.is_checked()
+    assert page.locator(".checklist-status").inner_text() == "1 of 4 complete"
+    assert page.evaluate("document.documentElement.dataset.quiet") == "true"
+    assert page.evaluate("document.documentElement.dataset.largeText") == "true"
     page.set_viewport_size({"width": 390, "height": 844})
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth"), "Tamil result toolbar overflow"
     page.set_viewport_size({"width": 1440, "height": 1100})
@@ -154,6 +172,19 @@ with sync_playwright() as playwright:
     assert page.locator(".planet-buttons button[aria-pressed=true]").inner_text() == "Mars"
     assert page.locator(".planet-detail .eyebrow").text_content() == "POSITION / Mars"
     assert page.locator(".chart-planet.selected").count() == 1
+    page.locator(".planet-buttons button", has_text="Mars").press("Home")
+    assert page.locator(".planet-buttons button").first.evaluate("e => e === document.activeElement")
+    page.keyboard.press("End")
+    assert page.locator(".planet-buttons button").last.evaluate("e => e === document.activeElement")
+    page.keyboard.press("Enter")
+    assert page.locator(".planet-buttons button").last.get_attribute("aria-pressed") == "true"
+    page.emulate_media(forced_colors="active", reduced_motion="reduce")
+    assert page.locator(".planet-buttons button").last.evaluate("e => getComputedStyle(e).outlineStyle") == "solid"
+    assert page.locator(".chart-explorer").evaluate("e => getComputedStyle(e).animationName") == "none"
+    page.emulate_media(forced_colors="none", reduced_motion="no-preference")
+    page.set_viewport_size({"width":320,"height":844})
+    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth"), "320px chart overflow"
+    page.set_viewport_size({"width":1440,"height":1100})
     page.screenshot(animations="disabled", path=str(ARTIFACTS / "studio-chart.png"), full_page=True)
     with page.expect_download(timeout=60000) as download:
         page.locator("#download-pdf").click()

@@ -14,6 +14,36 @@
     const dialog = document.querySelector("#help-dialog"), search = document.querySelector("#help-search");
     const results = document.querySelector("#help-results"), topic = document.querySelector("#help-topic");
     let opener, selectedKey = "birth-time", queryWords = [];
+    // Native buttons retain their normal Tab behavior. Arrow keys are an optional shortcut.
+    function keyboardGroup(container) {
+      container.addEventListener("keydown", event => {
+        if (!['ArrowDown','ArrowUp','ArrowLeft','ArrowRight','Home','End'].includes(event.key) || event.altKey || event.ctrlKey || event.metaKey) return;
+        const items = [...container.querySelectorAll("button")];
+        const index = items.indexOf(event.target);
+        if (index < 0 || !items.length) return;
+        event.preventDefault();
+        const next = event.key === 'Home' ? 0 : event.key === 'End' ? items.length - 1 :
+          (index + (['ArrowDown','ArrowRight'].includes(event.key) ? 1 : -1) + items.length) % items.length;
+        items[next].focus();
+      });
+    }
+    keyboardGroup(results);
+    search.addEventListener("keydown", event => {
+      if (event.key === "ArrowDown" && results.firstElementChild) {
+        event.preventDefault(); results.firstElementChild.focus();
+      }
+    });
+    const preferences = english(el("fieldset", undefined, "reading-preferences"));
+    preferences.append(el("legend", "Reading comfort"));
+    for (const [key, title] of [["quiet", "Turn off animations"], ["largeText", "Larger report text"]]) {
+      const label = el("label"), input = el("input"); input.type = "checkbox";
+      input.dataset.preference = key;
+      input.checked = document.documentElement.dataset[key] === "true";
+      input.addEventListener("change", () => { document.documentElement.dataset[key] = String(input.checked); });
+      label.append(input, document.createTextNode(title)); preferences.append(label);
+    }
+    preferences.append(el("small", "Device reduced-motion settings are always respected. Preferences last until you reload."));
+    dialog.append(preferences);
     const termMatches = item => queryWords.every(word => (item.title + " " + item.meaning + " " + item.next_step + " " + item.group).toLowerCase().includes(word));
     function showTerm(key) {
       const item = knowledge[key];
@@ -170,6 +200,7 @@
       diagram.append(wheel); layout.append(diagram);
       const inspect = english(el("div", undefined, "planet-inspector")), buttons = el("div", undefined, "planet-buttons"), detail = el("div", undefined, "planet-detail");
       buttons.setAttribute("role","group"); buttons.setAttribute("aria-label","Choose a graha"); detail.setAttribute("aria-live","polite");
+      keyboardGroup(buttons);
       function select(g,i) {
         [...buttons.children].forEach((button,index) => button.setAttribute("aria-pressed",String(index===i)));
         dots.forEach((dot,index) => dot.setAttribute("class", index===i ? "chart-planet selected" : "chart-planet"));
@@ -194,16 +225,49 @@
     function nextSteps(isChart) {
       const section = el("section",undefined,"next-steps"); section.append(el("h3",t.nextSteps));
       const body = english(el("div")); body.append(el("p","A short checklist. Ticks stay in this page only and are not included in exports."));
+      const progress = el("progress"); progress.max = 4; progress.value = 0;
+      progress.setAttribute("aria-label", "Checklist completion");
+      const status = el("p", "0 of 4 complete", "checklist-status"); status.setAttribute("role", "status");
+      body.append(progress, status);
       const steps = isChart ? ["Check the birth record, timezone and ayanamsa.","Explore the Moon, Sun and ascendant separately.","Read unknown-time and timing limits before using a date.","Download the PDF and keep the file private."] :
         ["Verify both birth records and calculation settings.","Open essential checks and their exceptions.","Discuss communication, boundaries and shared expectations directly.","Download the report only if both people are comfortable sharing it."];
       for(const text of steps){const label=el("label"),input=el("input");input.type="checkbox";label.append(input,document.createTextNode(text));body.append(label);}
+      body.addEventListener("change", () => {
+        const count = body.querySelectorAll("input:checked").length;
+        progress.value = count; status.textContent = count + " of 4 complete";
+      });
       section.append(body); return section;
+    }
+    function reportNavigation(output) {
+      const nav = el("nav", undefined, "report-navigation"); nav.setAttribute("aria-label", t.result || "Report");
+      const targets = [...output.querySelectorAll(".analysis-overview, .report-section, .chart-explorer, .next-steps")];
+      for (const target of targets) {
+        if (target.classList.contains("chart-explorer") && target.closest(".report-section")) continue;
+        const heading = target.querySelector("summary, h3, h4");
+        if (!heading) continue;
+        const label = heading.cloneNode(true); label.querySelectorAll("button").forEach(button => button.remove());
+        const button = el("button", label.textContent.trim()); button.type = "button";
+        button.addEventListener("click", () => {
+          if (target.tagName === "DETAILS") target.open = true;
+          let parent = target.parentElement;
+          while (parent && parent !== output) { if (parent.tagName === "DETAILS") parent.open = true; parent = parent.parentElement; }
+          heading.tabIndex = -1; heading.focus({preventScroll:true});
+          target.scrollIntoView({block:"start", behavior:"auto"});
+        });
+        nav.append(button);
+      }
+      output.prepend(nav);
+    }
+    function capture() { return [...document.querySelectorAll(".next-steps input")].map(input => input.checked); }
+    function restore(ticks) {
+      document.querySelectorAll(".next-steps input").forEach((input, index) => { input.checked = Boolean(ticks?.[index]); });
+      document.querySelector(".next-steps input")?.dispatchEvent(new Event("change", {bubbles:true}));
     }
     function provenance(data) {
       const item = english(el("p",undefined,"report-provenance"));
       item.append(document.createTextNode("CALCULATION / Swiss Ephemeris · " + (data.ayanamsa || "lahiri") + " · Whole-sign houses · Definitions in English "),helpButton("birth-time")); return item;
     }
-    return {definition,helpButton,matchOverview,factorControls,chartExplorer,nextSteps,provenance};
+    return {definition,helpButton,matchOverview,factorControls,chartExplorer,nextSteps,provenance,reportNavigation,capture,restore};
   }
   window.AstroExplore = {boot};
 })();
