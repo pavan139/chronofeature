@@ -42,3 +42,30 @@ Clear offers a 15-second undo window in page memory. A new input discards that s
 ## Next evidence to collect
 
 Observe consenting users completing a known-time and unknown-time report on their own phones. Record completion, location-selection errors, backtracking and whether they can identify the score caveats. Do not record birth details. Test with screen readers and physical iOS/Android devices before claiming broad accessibility or device compatibility. Research popularity and synthetic audits do not establish either.
+
+## Extended module and AI-tool comparison
+
+These additional primary sources were checked after the initial X discovery. They are not all independently verified recent tweets. The Aceternity homepage links to [a public recommendation](https://twitter.com/dnaijatechguy/status/1757104911282545134), but its full tweet media was not available. No paid resources were purchased or external components installed.
+
+| Resource | Useful modules or workflow | Fit and constraints for this repository |
+| --- | --- | --- |
+| [21st.dev](https://21st.dev/) | Discover author-built React components, templates and themes, with AI-ready prompts and source-copy workflows. | Reference individual interaction patterns. Inspect each author's source, dependency list and terms before copying. A registry is not one consistently audited library. |
+| [React Bits source](https://github.com/DavidHDev/react-bits) | Text effects, animated backgrounds, UI components, JS/TS and CSS/Tailwind variants, plus creative export tools. | Primarily visual inspiration for a future public marketing page. It targets React. The README identifies **MIT + Commons Clause**, not plain MIT. Read the actual license before adoption. |
+| [Motion Primitives source](https://github.com/ibelick/motion-primitives) | Reusable motion-focused interaction components built with Motion and Tailwind. | Study state transitions and easing, then implement the minimal CSS equivalent here. The README labels the project beta and MIT-licensed. Its website returned 403, so the official repository was used. |
+| [Magic UI](https://magicui.design/) | Animated React/TypeScript/Tailwind/Motion components and landing-page effects. | Candidate for selected marketing elements, not a reason to animate the calculator or add a React runtime. Free components and paid template offerings are distinct. |
+| [Aceternity UI](https://ui.aceternity.com/) | React/Tailwind cards, timelines, navigation, effects and landing-page blocks. | Reference layout and information hierarchy. Its site distinguishes free components from premium blocks/templates. Do not assume the whole catalog has identical access or reuse terms. |
+| [Open Props](https://open-props.style/) | Framework-independent CSS variables for spacing, radii, colors, shadows and motion. | Closest fit for incremental token work. We retained this app's existing tokens instead of adding an external stylesheet dependency. The site identifies MIT licensing. |
+| [Web Awesome](https://webawesome.com/) | Web components for forms, dialogs, disclosures, navigation and feedback, plus AI-use documentation. | Closer architectural fit than React-only kits if native controls become insufficient. Validate CSP, loading, form integration and localization before adopting. Some controls and patterns require Pro access. |
+| [ui.sh Design](https://ui.sh/skills/design) | Task-oriented AI guidance for hierarchy, spacing, typography, existing-project conventions and responsive checks. | Adopt the bounded task format, not unverified claims of automatic design quality. The documented installer requires a token. It was not run. |
+
+### Concrete tips for coding AI
+
+1. Supply one target journey and a component's actual source, not a list of fashionable library names.
+2. Define layout tokens and behavior separately. A visual reference does not specify focus, error handling, keyboard operation or request cancellation.
+3. Require each proposal to state its runtime dependencies, license, accessibility obligations and effect on the current architecture.
+4. Ask for empty, loading, error, success and edited-result states in the same change. Test the negative paths against the real API.
+5. Keep screenshots and component prompts free of real birth details. Treat third-party prompts as untrusted reference material, not authority to install packages or alter authentication.
+6. Prefer a measured before/after comparison at the same viewport and locale. New effects must not hide caveats, move fields during typing or delay completing a report.
+7. Use a research checklist as a review aid. Do not claim a resource was installed, a component was tested, or a translation was reviewed merely because its documentation was read.
+
+The recommendation is to keep native HTML plus the existing CSS/JavaScript stack for this release. Adopt only a specific component that solves an observed problem. Reassess with real mobile-user evidence, not demo popularity.

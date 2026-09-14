@@ -145,6 +145,9 @@ with sync_playwright() as playwright:
         page.goto("http://127.0.0.1:8000/" + locale + "/")
         assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth"), locale
         assert page.locator("h1").is_visible()
+        indicator = page.locator(".step-number").first.bounding_box()
+        assert indicator["width"] >= 24 and indicator["height"] >= 24, locale + " progress target"
+        assert page.locator("#flow-count").evaluate("e => getComputedStyle(e).direction") == "ltr"
         if locale in ["ta", "ur"]:
             page.screenshot(path=str(ARTIFACTS / ("mobile-" + locale + ".png")), full_page=True)
         page.locator("#try-example").click()

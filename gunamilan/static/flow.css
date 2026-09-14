@@ -17,12 +17,12 @@
 .workspace { grid-template-columns: minmax(0, 1fr) 18rem; max-width: 1080px; margin-inline: auto; }
 .input-panel { box-shadow: 0 4px 6px #142b3203, 0 20px 60px #142b3207; }
 .section-title { padding: 1.15rem 1.6rem; }
-.flow-count { margin-inline-start: auto; color: var(--text-secondary); font-variant-numeric: tabular-nums; font-size: .875rem; }
+.flow-count { margin-inline-start: auto; color: var(--text-secondary); font-variant-numeric: tabular-nums; font-size: .875rem; direction: ltr; unicode-bidi: isolate; }
 .flow-progress { list-style: none; padding: 1rem 1.6rem 0; margin: 0; display: flex; gap: .6rem; }
 .flow-progress li { flex: 1; min-width: 0; }
 .flow-progress button { display: flex; align-items: center; gap: .5rem; width: 100%; min-height: 3rem; padding: .5rem; border-radius: .65rem; background: var(--surface-subtle); color: var(--text-secondary); text-align: start; font-size: .875rem; line-height: 1.5; overflow-wrap: anywhere; border: 1px solid transparent; }
 .flow-progress button[aria-current] { background: var(--copper-light); color: var(--ink); border-color: var(--accent-border); }
-.step-number { display: grid; place-items: center; flex: 0 0 1.6rem; height: 1.6rem; font-variant-numeric: tabular-nums; border: 1px solid var(--line); border-radius: 50%; font-size: .8rem; }
+.step-number { display: grid; place-items: center; flex: 0 0 1.6rem; inline-size: 1.6rem; min-inline-size: 1.6rem; height: 1.6rem; font-variant-numeric: tabular-nums; border: 1px solid var(--line); border-radius: 50%; font-size: .8rem; }
 .flow-progress [aria-current] .step-number { background: var(--ink); color: var(--white); border-color: var(--ink); }
 .flow-progress [data-complete=true] .step-number { border-color: var(--green); color: var(--green); }
 .people { padding-block: 1.6rem; }
