@@ -332,7 +332,7 @@ def match_pdf(req: MatchRequest, locale: str = "en"):
     from .reports import render_pdf, validate_locale
     validate_locale(locale)
     result = match_full(req)
-    return render_pdf(result, [req.groom.model_dump(mode="json"), req.bride.model_dump(mode="json")],
+    return render_pdf(result, [_report_birth(req.groom), _report_birth(req.bride)],
                       "match", locale, req.ayanamsa)
 
 
@@ -341,7 +341,14 @@ def chart_pdf(birth: BirthInput, locale: str = "en", ayanamsa: str = "lahiri"):
     from .reports import render_pdf, validate_locale
     validate_locale(locale)
     result = chart_endpoint(birth, ayanamsa)
-    return render_pdf(result, [birth.model_dump(mode="json")], "chart", locale, ayanamsa)
+    return render_pdf(result, [_report_birth(birth)], "chart", locale, ayanamsa)
+
+
+def _report_birth(birth: BirthInput):
+    resolved, _ = birth.resolve()
+    return {**birth.model_dump(mode="json"), "timezone": resolved.timezone,
+            "latitude": resolved.latitude, "longitude": resolved.longitude,
+            "place": resolved.place_label or birth.place}
 
 
 # Public documents are rendered on the server. Personal results are POST-only.

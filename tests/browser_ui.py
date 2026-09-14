@@ -47,6 +47,9 @@ with sync_playwright() as playwright:
     page.wait_for_url("**/ta/")
     assert page.locator("#reading").is_visible()
     assert page.locator(".score-value").all_text_contents() == score_before
+    page.set_viewport_size({"width": 390, "height": 844})
+    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth"), "Tamil result toolbar overflow"
+    page.set_viewport_size({"width": 1440, "height": 1100})
     page.locator("#toggle-details").click()
     assert page.locator("#report-content details:not([open])").count() == 0
     page.locator("#toggle-details").click()
