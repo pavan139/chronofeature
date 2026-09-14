@@ -28,6 +28,8 @@ jobs:
           fi
       - name: Engine and HTTP tests
         run: python -m pytest -q
+      - name: Verify container build
+        run: docker build -t astro-ci .
       - name: Install browser
         run: python -m playwright install --with-deps chromium
       - name: Install script fonts
@@ -37,6 +39,26 @@ jobs:
           uvicorn gunamilan.api:app --host 127.0.0.1 --port 8000 > /tmp/astro-server.log 2>&1 &
           python -c "import urllib.request,time; [(time.sleep(1)) for _ in range(3)]; urllib.request.urlopen('http://127.0.0.1:8000/health')"
           python tests/browser_ui.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Measure page quality on an indexable local instance
+        run: |
+          INDEXABLE=true INDEX_LOCALES=en SITE_URL=http://127.0.0.1:8001 uvicorn gunamilan.api:app --host 127.0.0.1 --port 8001 > /tmp/astro-audit.log 2>&1 &
+          python -c "import time; time.sleep(2)"
+          npx --yes lighthouse@13.4.1 http://127.0.0.1:8001/en/ --chrome-flags="--headless --no-sandbox" --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=test-results/lighthouse.json --quiet
+          python - <<'PY'
+          import json
+          report = json.load(open("test-results/lighthouse.json"))
+          scores = {name: int(value["score"] * 100) for name, value in report["categories"].items()}
+          print("ASTRO_LIGHTHOUSE=" + json.dumps(scores))
+          for key in ["largest-contentful-paint", "cumulative-layout-shift", "total-blocking-time"]:
+              print(key + ": " + report["audits"][key]["displayValue"])
+          failed = [{"id": k, "title": v["title"], "description": v.get("description", "")}
+                    for k, v in report["audits"].items() if v.get("score") == 0]
+          print("ASTRO_AUDIT_FAILURES=" + json.dumps(failed))
+          assert scores["performance"] >= 90 and scores["accessibility"] >= 90 and scores["seo"] >= 90, scores
+          PY
       - name: Screenshot preview
         if: always()
         run: |
