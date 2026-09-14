@@ -152,7 +152,7 @@ with sync_playwright() as playwright:
     assert page.locator(".chart-highlights").inner_text().find("Not calculated") >= 0
     page.locator(".planet-buttons button", has_text="Mars").click()
     assert page.locator(".planet-buttons button[aria-pressed=true]").inner_text() == "Mars"
-    assert "POSITION / Mars" in page.locator(".planet-detail").inner_text()
+    assert page.locator(".planet-detail .eyebrow").text_content() == "POSITION / Mars"
     assert page.locator(".chart-planet.selected").count() == 1
     page.screenshot(animations="disabled", path=str(ARTIFACTS / "studio-chart.png"), full_page=True)
     with page.expect_download(timeout=60000) as download:
