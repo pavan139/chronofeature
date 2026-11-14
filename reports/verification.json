@@ -1,0 +1,1674 @@
+{
+  "schema_version": 3,
+  "generated_at_utc": "2026-11-15T04:20:09.407792+00:00",
+  "repository": "chronofeature",
+  "field": "ML platform and feature engineering",
+  "ai_connection": "Preventing label leakage and serving the same features used in training",
+  "language": "python",
+  "toolchain": null,
+  "source_sha256": "72c6abbbc85148eaef555d1582013326d8d3a0babc0b4ceb7842a346f1925999",
+  "python": "3.12.14",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "scope": "implemented_systems_and_controlled_cpu_experiments",
+  "tests_discovered": 21,
+  "tests_skipped": 0,
+  "tests_executed": 21,
+  "external_provider_calls": false,
+  "passed": true,
+  "checks": [
+    {
+      "name": "metadata_and_documentation",
+      "passed": true,
+      "errors": []
+    },
+    {
+      "name": "lint",
+      "passed": true,
+      "returncode": 0,
+      "stdout": "All checks passed!\n",
+      "stdout_truncated": false,
+      "stderr": "",
+      "stderr_truncated": false,
+      "command": [
+        "/workspace/applied-ai-labs/.venv/bin/python",
+        "-m",
+        "ruff",
+        "check",
+        "src",
+        "test",
+        "scripts"
+      ],
+      "seconds": 0.122785
+    },
+    {
+      "name": "format",
+      "passed": true,
+      "returncode": 0,
+      "stdout": "7 files already formatted\n",
+      "stdout_truncated": false,
+      "stderr": "",
+      "stderr_truncated": false,
+      "command": [
+        "/workspace/applied-ai-labs/.venv/bin/python",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "src",
+        "test",
+        "scripts"
+      ],
+      "seconds": 0.124618
+    },
+    {
+      "name": "compile",
+      "passed": true,
+      "returncode": 0,
+      "stdout": "",
+      "stdout_truncated": false,
+      "stderr": "",
+      "stderr_truncated": false,
+      "command": [
+        "/workspace/applied-ai-labs/.venv/bin/python",
+        "-m",
+        "compileall",
+        "-q",
+        "src",
+        "test",
+        "scripts"
+      ],
+      "seconds": 0.064291
+    },
+    {
+      "name": "unit_tests",
+      "passed": true,
+      "returncode": 0,
+      "stdout": "",
+      "stdout_truncated": false,
+      "stderr": "test_atomic_feature_version_publish_and_retry (test_features.FeatureTests.test_atomic_feature_version_publish_and_retry) ... ok\ntest_duplicate_ingest_is_idempotent_but_conflict_rolls_back_batch (test_features.FeatureTests.test_duplicate_ingest_is_idempotent_but_conflict_rolls_back_batch) ... ok\ntest_empty_materialized_windows_also_have_cache_ttl (test_features.FeatureTests.test_empty_materialized_windows_also_have_cache_ttl) ... ok\ntest_equal_event_time_latest_tie_uses_event_id (test_features.FeatureTests.test_equal_event_time_latest_tie_uses_event_id) ... ok\ntest_event_entity_and_time_are_immutable_across_revisions (test_features.FeatureTests.test_event_entity_and_time_are_immutable_across_revisions) ... ok\ntest_feature_specification_identity_is_versioned_immutable (test_features.FeatureTests.test_feature_specification_identity_is_versioned_immutable) ... ok\ntest_future_cutoff_and_invalid_clocks_values_specs_are_rejected (test_features.FeatureTests.test_future_cutoff_and_invalid_clocks_values_specs_are_rejected) ... ok\ntest_future_revision_does_not_change_past_features (test_features.FeatureTests.test_future_revision_does_not_change_past_features) ... ok\ntest_independent_scan_matches_corrections_tombstones_and_generations (test_features.FeatureTests.test_independent_scan_matches_corrections_tombstones_and_generations) ... ok\ntest_ingestion_generation_preserves_historical_materialization_parity (test_features.FeatureTests.test_ingestion_generation_preserves_historical_materialization_parity) ... ok\ntest_late_lower_revision_cannot_override_authoritative_newer_revision (test_features.FeatureTests.test_late_lower_revision_cannot_override_authoritative_newer_revision) ... ok\ntest_materialization_replay_does_not_reactivate_old_version (test_features.FeatureTests.test_materialization_replay_does_not_reactivate_old_version) ... ok\ntest_observation_cutoff_prevents_event_time_only_label_leak (test_features.FeatureTests.test_observation_cutoff_prevents_event_time_only_label_leak) ... ok\ntest_offline_batch_retains_one_source_snapshot_during_concurrent_ingest (test_features.FeatureTests.test_offline_batch_retains_one_source_snapshot_during_concurrent_ingest) ... ok\ntest_offline_join_does_not_use_targets_and_rows_do_not_alias (test_features.FeatureTests.test_offline_join_does_not_use_targets_and_rows_do_not_alias) ... ok\ntest_online_expires_before_rolling_window_changes_even_if_ttl_fresh (test_features.FeatureTests.test_online_expires_before_rolling_window_changes_even_if_ttl_fresh) ... ok\ntest_seeded_end_to_end_experiment_across_seeds (test_features.FeatureTests.test_seeded_end_to_end_experiment_across_seeds) ... ok\ntest_ttl_boundary_is_inclusive_then_values_are_withheld (test_features.FeatureTests.test_ttl_boundary_is_inclusive_then_values_are_withheld) ... ok\ntest_unavailable_entity_and_time_travel_are_explicit (test_features.FeatureTests.test_unavailable_entity_and_time_travel_are_explicit) ... ok\ntest_unknown_source_snapshot_is_rejected (test_features.FeatureTests.test_unknown_source_snapshot_is_rejected) ... ok\ntest_windows_are_lower_exclusive_and_upper_inclusive (test_features.FeatureTests.test_windows_are_lower_exclusive_and_upper_inclusive) ... ok\n\n----------------------------------------------------------------------\nRan 21 tests in 0.761s\n\nOK\n",
+      "stderr_truncated": false,
+      "command": [
+        "/workspace/applied-ai-labs/.venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "test",
+        "-v"
+      ],
+      "seconds": 0.928871
+    },
+    {
+      "name": "demo",
+      "passed": true,
+      "returncode": 0,
+      "stdout": "",
+      "stdout_truncated": false,
+      "stderr": "",
+      "stderr_truncated": false,
+      "command": [
+        "/workspace/applied-ai-labs/.venv/bin/python",
+        "-m",
+        "chronofeature",
+        "demo",
+        "--output",
+        "/tmp/cli-reports-a8oird44/demo.json"
+      ],
+      "seconds": 0.284383,
+      "report": {
+        "schema_version": 1,
+        "experiment": "synthetic_point_in_time_features_vs_independent_scan",
+        "seed": 17,
+        "input_sha256": "23b98b89c8db84158fb043a7d28dbf3b763481bc388e4221ba4fa9227696f6ff",
+        "base_events": 100,
+        "source_revisions": 112,
+        "oracle_comparisons": 120,
+        "checks": 138,
+        "passed": 138,
+        "example_training_row": {
+          "label_id": "label-0",
+          "target": 0,
+          "features": {
+            "entity": "entity-0",
+            "feature_time": 100,
+            "observation_cutoff": 100,
+            "source_generation": 7,
+            "spec_name": "transactions",
+            "spec_sha256": "e4a54fdccec19e64e8fa4026873e946c1947c8dbd76b72d90232ae0f02a3d64c",
+            "spec_version": 1,
+            "windows": {
+              "10": {
+                "count": 0,
+                "last": null,
+                "last_event_time": null,
+                "mean": null,
+                "status": "missing",
+                "sum": 0,
+                "valid_before": 121
+              },
+              "30": {
+                "count": null,
+                "last": null,
+                "last_event_time": 78,
+                "mean": null,
+                "status": "stale",
+                "sum": null,
+                "valid_before": 99
+              }
+            }
+          }
+        },
+        "example_expired_serving": {
+          "version_id": "crashed",
+          "served_at": 200,
+          "features": {
+            "entity": "entity-0",
+            "feature_time": 105,
+            "observation_cutoff": 105,
+            "source_generation": 9,
+            "spec_name": "transactions",
+            "spec_sha256": "e4a54fdccec19e64e8fa4026873e946c1947c8dbd76b72d90232ae0f02a3d64c",
+            "spec_version": 1,
+            "windows": {
+              "10": {
+                "count": null,
+                "last": null,
+                "last_event_time": null,
+                "mean": null,
+                "status": "expired",
+                "sum": null,
+                "valid_before": 126
+              },
+              "30": {
+                "count": null,
+                "last": null,
+                "last_event_time": 94,
+                "mean": null,
+                "status": "expired",
+                "sum": null,
+                "valid_before": 108
+              }
+            }
+          },
+          "status": "available"
+        },
+        "limitations": [
+          "Availability timestamps are declared source provenance, not externally attested clocks.",
+          "Local SQLite snapshots and integer-valued signals; no distributed online store or throughput claim.",
+          "Online values retain their materialization feature time; they are not recomputed at serving time."
+        ]
+      }
+    },
+    {
+      "name": "evaluate",
+      "passed": true,
+      "returncode": 0,
+      "stdout": "",
+      "stdout_truncated": false,
+      "stderr": "",
+      "stderr_truncated": false,
+      "command": [
+        "/workspace/applied-ai-labs/.venv/bin/python",
+        "-m",
+        "chronofeature",
+        "evaluate",
+        "--output",
+        "/tmp/cli-reports-a8oird44/evaluate.json"
+      ],
+      "seconds": 0.289627,
+      "report": {
+        "schema_version": 1,
+        "experiment": "synthetic_point_in_time_features_vs_independent_scan",
+        "seed": 17,
+        "input_sha256": "23b98b89c8db84158fb043a7d28dbf3b763481bc388e4221ba4fa9227696f6ff",
+        "base_events": 100,
+        "source_revisions": 112,
+        "oracle_comparisons": 120,
+        "checks": 138,
+        "passed": 138,
+        "cases": [
+          {
+            "id": "duplicate-ingest-stable-generation",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e0-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e0-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e0-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e0-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e0-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e1-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e1-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e1-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e1-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e1-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e2-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e2-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e2-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e2-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e2-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e3-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e3-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e3-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e3-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e3-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e4-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e4-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e4-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e4-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e4-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e5-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e5-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e5-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e5-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e5-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e6-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e6-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e6-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e6-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e6-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e7-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e7-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e7-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e7-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e7-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e0-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e0-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e0-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e0-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e0-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e1-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e1-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e1-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e1-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e1-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e2-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e2-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e2-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e2-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e2-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e3-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e3-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e3-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e3-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e3-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e4-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e4-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e4-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e4-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e4-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e5-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e5-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e5-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e5-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e5-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e6-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e6-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e6-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e6-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e6-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e7-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e7-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e7-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e7-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e7-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e0-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e0-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e0-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e0-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e0-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e1-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e1-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e1-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e1-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e1-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e2-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e2-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e2-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e2-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e2-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e3-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e3-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e3-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e3-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e3-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e4-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e4-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e4-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e4-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e4-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e5-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e5-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e5-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e5-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e5-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e6-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e6-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e6-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e6-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e6-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e7-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e7-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e7-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e7-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e7-t140",
+            "passed": true
+          },
+          {
+            "id": "target-never-enters-features",
+            "passed": true
+          },
+          {
+            "id": "online-offline-entity-0",
+            "passed": true
+          },
+          {
+            "id": "online-offline-entity-1",
+            "passed": true
+          },
+          {
+            "id": "online-offline-entity-2",
+            "passed": true
+          },
+          {
+            "id": "online-offline-entity-3",
+            "passed": true
+          },
+          {
+            "id": "online-offline-entity-4",
+            "passed": true
+          },
+          {
+            "id": "online-offline-entity-5",
+            "passed": true
+          },
+          {
+            "id": "online-offline-entity-6",
+            "passed": true
+          },
+          {
+            "id": "online-offline-entity-7",
+            "passed": true
+          },
+          {
+            "id": "late-observation-not-label-leak",
+            "passed": true
+          },
+          {
+            "id": "old-online-version-immutable",
+            "passed": true
+          },
+          {
+            "id": "backfill-new-version-parity",
+            "passed": true
+          },
+          {
+            "id": "atomic-materialization-pointer",
+            "passed": true
+          },
+          {
+            "id": "restart-materialization",
+            "passed": true
+          },
+          {
+            "id": "replay-does-not-roll-pointer-back",
+            "passed": true
+          },
+          {
+            "id": "expired-values-withheld",
+            "passed": true
+          },
+          {
+            "id": "future-observation-cutoff-denied",
+            "passed": true
+          }
+        ],
+        "example_training_row": {
+          "label_id": "label-0",
+          "target": 0,
+          "features": {
+            "entity": "entity-0",
+            "feature_time": 100,
+            "observation_cutoff": 100,
+            "source_generation": 7,
+            "spec_name": "transactions",
+            "spec_sha256": "e4a54fdccec19e64e8fa4026873e946c1947c8dbd76b72d90232ae0f02a3d64c",
+            "spec_version": 1,
+            "windows": {
+              "10": {
+                "count": 0,
+                "last": null,
+                "last_event_time": null,
+                "mean": null,
+                "status": "missing",
+                "sum": 0,
+                "valid_before": 121
+              },
+              "30": {
+                "count": null,
+                "last": null,
+                "last_event_time": 78,
+                "mean": null,
+                "status": "stale",
+                "sum": null,
+                "valid_before": 99
+              }
+            }
+          }
+        },
+        "example_expired_serving": {
+          "version_id": "crashed",
+          "served_at": 200,
+          "features": {
+            "entity": "entity-0",
+            "feature_time": 105,
+            "observation_cutoff": 105,
+            "source_generation": 9,
+            "spec_name": "transactions",
+            "spec_sha256": "e4a54fdccec19e64e8fa4026873e946c1947c8dbd76b72d90232ae0f02a3d64c",
+            "spec_version": 1,
+            "windows": {
+              "10": {
+                "count": null,
+                "last": null,
+                "last_event_time": null,
+                "mean": null,
+                "status": "expired",
+                "sum": null,
+                "valid_before": 126
+              },
+              "30": {
+                "count": null,
+                "last": null,
+                "last_event_time": 94,
+                "mean": null,
+                "status": "expired",
+                "sum": null,
+                "valid_before": 108
+              }
+            }
+          },
+          "status": "available"
+        },
+        "limitations": [
+          "Availability timestamps are declared source provenance, not externally attested clocks.",
+          "Local SQLite snapshots and integer-valued signals; no distributed online store or throughput claim.",
+          "Online values retain their materialization feature time; they are not recomputed at serving time."
+        ]
+      }
+    },
+    {
+      "name": "wheel_build",
+      "passed": true,
+      "returncode": 0,
+      "stdout": "Processing /workspace/ai-adjacent-repositories/chronofeature\n  Preparing metadata (pyproject.toml): started\n  Preparing metadata (pyproject.toml): finished with status 'done'\nBuilding wheels for collected packages: chronofeature\n  Building wheel for chronofeature (pyproject.toml): started\n  Building wheel for chronofeature (pyproject.toml): finished with status 'done'\n  Created wheel for chronofeature: filename=chronofeature-0.1.0-py3-none-any.whl size=12803 sha256=b3387c044ab0840ee19e2cb6ba9236e6dee4715f3bee6710aeaddc7268f872e8\n  Stored in directory: /tmp/pip-ephem-wheel-cache-l4w7mnrh/wheels/3f/f5/ee/6dd82785716dabb5b65cabddf33cc71fd15cd457bbd1c91b53\nSuccessfully built chronofeature\n",
+      "stdout_truncated": false,
+      "stderr": "",
+      "stderr_truncated": false,
+      "command": [
+        "/workspace/applied-ai-labs/.venv/bin/python",
+        "-m",
+        "pip",
+        "wheel",
+        "--no-deps",
+        "--no-build-isolation",
+        "--no-index",
+        "--wheel-dir",
+        "/tmp/cold-wheel-4nyrkwnu/wheels",
+        "."
+      ],
+      "seconds": 1.512419
+    },
+    {
+      "name": "wheel_install",
+      "passed": true,
+      "returncode": 0,
+      "stdout": "Processing ./wheels/chronofeature-0.1.0-py3-none-any.whl\nInstalling collected packages: chronofeature\nSuccessfully installed chronofeature-0.1.0\n",
+      "stdout_truncated": false,
+      "stderr": "",
+      "stderr_truncated": false,
+      "command": [
+        "/tmp/cold-wheel-4nyrkwnu/environment/bin/python",
+        "-I",
+        "-m",
+        "pip",
+        "install",
+        "--no-deps",
+        "--no-index",
+        "/tmp/cold-wheel-4nyrkwnu/wheels/chronofeature-0.1.0-py3-none-any.whl"
+      ],
+      "seconds": 1.075194
+    },
+    {
+      "name": "wheel_import_origin",
+      "passed": true,
+      "returncode": 0,
+      "stdout": "/tmp/cold-wheel-4nyrkwnu/environment/lib/python3.12/site-packages/chronofeature/__init__.py\n",
+      "stdout_truncated": false,
+      "stderr": "",
+      "stderr_truncated": false,
+      "command": [
+        "/tmp/cold-wheel-4nyrkwnu/environment/bin/python",
+        "-I",
+        "-c",
+        "import chronofeature as module; import sys; from pathlib import Path; assert Path(module.__file__).resolve().is_relative_to(Path(sys.prefix).resolve()); print(module.__file__)"
+      ],
+      "seconds": 0.066778
+    },
+    {
+      "name": "wheel_demo",
+      "passed": true,
+      "returncode": 0,
+      "stdout": "",
+      "stdout_truncated": false,
+      "stderr": "",
+      "stderr_truncated": false,
+      "command": [
+        "/tmp/cold-wheel-4nyrkwnu/environment/bin/python",
+        "-I",
+        "-m",
+        "chronofeature",
+        "demo",
+        "--output",
+        "/tmp/cli-reports-476l6qh_/demo.json"
+      ],
+      "seconds": 0.391046,
+      "report": {
+        "schema_version": 1,
+        "experiment": "synthetic_point_in_time_features_vs_independent_scan",
+        "seed": 17,
+        "input_sha256": "23b98b89c8db84158fb043a7d28dbf3b763481bc388e4221ba4fa9227696f6ff",
+        "base_events": 100,
+        "source_revisions": 112,
+        "oracle_comparisons": 120,
+        "checks": 138,
+        "passed": 138,
+        "example_training_row": {
+          "label_id": "label-0",
+          "target": 0,
+          "features": {
+            "entity": "entity-0",
+            "feature_time": 100,
+            "observation_cutoff": 100,
+            "source_generation": 7,
+            "spec_name": "transactions",
+            "spec_sha256": "e4a54fdccec19e64e8fa4026873e946c1947c8dbd76b72d90232ae0f02a3d64c",
+            "spec_version": 1,
+            "windows": {
+              "10": {
+                "count": 0,
+                "last": null,
+                "last_event_time": null,
+                "mean": null,
+                "status": "missing",
+                "sum": 0,
+                "valid_before": 121
+              },
+              "30": {
+                "count": null,
+                "last": null,
+                "last_event_time": 78,
+                "mean": null,
+                "status": "stale",
+                "sum": null,
+                "valid_before": 99
+              }
+            }
+          }
+        },
+        "example_expired_serving": {
+          "version_id": "crashed",
+          "served_at": 200,
+          "features": {
+            "entity": "entity-0",
+            "feature_time": 105,
+            "observation_cutoff": 105,
+            "source_generation": 9,
+            "spec_name": "transactions",
+            "spec_sha256": "e4a54fdccec19e64e8fa4026873e946c1947c8dbd76b72d90232ae0f02a3d64c",
+            "spec_version": 1,
+            "windows": {
+              "10": {
+                "count": null,
+                "last": null,
+                "last_event_time": null,
+                "mean": null,
+                "status": "expired",
+                "sum": null,
+                "valid_before": 126
+              },
+              "30": {
+                "count": null,
+                "last": null,
+                "last_event_time": 94,
+                "mean": null,
+                "status": "expired",
+                "sum": null,
+                "valid_before": 108
+              }
+            }
+          },
+          "status": "available"
+        },
+        "limitations": [
+          "Availability timestamps are declared source provenance, not externally attested clocks.",
+          "Local SQLite snapshots and integer-valued signals; no distributed online store or throughput claim.",
+          "Online values retain their materialization feature time; they are not recomputed at serving time."
+        ]
+      }
+    },
+    {
+      "name": "wheel_evaluate",
+      "passed": true,
+      "returncode": 0,
+      "stdout": "",
+      "stdout_truncated": false,
+      "stderr": "",
+      "stderr_truncated": false,
+      "command": [
+        "/tmp/cold-wheel-4nyrkwnu/environment/bin/python",
+        "-I",
+        "-m",
+        "chronofeature",
+        "evaluate",
+        "--output",
+        "/tmp/cli-reports-476l6qh_/evaluate.json"
+      ],
+      "seconds": 0.469805,
+      "report": {
+        "schema_version": 1,
+        "experiment": "synthetic_point_in_time_features_vs_independent_scan",
+        "seed": 17,
+        "input_sha256": "23b98b89c8db84158fb043a7d28dbf3b763481bc388e4221ba4fa9227696f6ff",
+        "base_events": 100,
+        "source_revisions": 112,
+        "oracle_comparisons": 120,
+        "checks": 138,
+        "passed": 138,
+        "cases": [
+          {
+            "id": "duplicate-ingest-stable-generation",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e0-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e0-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e0-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e0-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e0-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e1-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e1-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e1-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e1-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e1-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e2-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e2-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e2-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e2-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e2-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e3-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e3-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e3-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e3-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e3-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e4-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e4-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e4-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e4-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e4-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e5-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e5-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e5-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e5-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e5-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e6-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e6-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e6-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e6-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e6-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e7-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e7-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e7-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e7-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g1-e7-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e0-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e0-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e0-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e0-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e0-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e1-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e1-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e1-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e1-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e1-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e2-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e2-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e2-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e2-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e2-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e3-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e3-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e3-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e3-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e3-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e4-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e4-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e4-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e4-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e4-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e5-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e5-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e5-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e5-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e5-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e6-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e6-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e6-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e6-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e6-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e7-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e7-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e7-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e7-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g3-e7-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e0-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e0-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e0-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e0-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e0-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e1-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e1-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e1-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e1-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e1-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e2-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e2-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e2-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e2-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e2-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e3-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e3-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e3-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e3-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e3-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e4-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e4-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e4-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e4-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e4-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e5-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e5-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e5-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e5-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e5-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e6-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e6-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e6-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e6-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e6-t140",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e7-t10",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e7-t30",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e7-t60",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e7-t100",
+            "passed": true
+          },
+          {
+            "id": "oracle-g7-e7-t140",
+            "passed": true
+          },
+          {
+            "id": "target-never-enters-features",
+            "passed": true
+          },
+          {
+            "id": "online-offline-entity-0",
+            "passed": true
+          },
+          {
+            "id": "online-offline-entity-1",
+            "passed": true
+          },
+          {
+            "id": "online-offline-entity-2",
+            "passed": true
+          },
+          {
+            "id": "online-offline-entity-3",
+            "passed": true
+          },
+          {
+            "id": "online-offline-entity-4",
+            "passed": true
+          },
+          {
+            "id": "online-offline-entity-5",
+            "passed": true
+          },
+          {
+            "id": "online-offline-entity-6",
+            "passed": true
+          },
+          {
+            "id": "online-offline-entity-7",
+            "passed": true
+          },
+          {
+            "id": "late-observation-not-label-leak",
+            "passed": true
+          },
+          {
+            "id": "old-online-version-immutable",
+            "passed": true
+          },
+          {
+            "id": "backfill-new-version-parity",
+            "passed": true
+          },
+          {
+            "id": "atomic-materialization-pointer",
+            "passed": true
+          },
+          {
+            "id": "restart-materialization",
+            "passed": true
+          },
+          {
+            "id": "replay-does-not-roll-pointer-back",
+            "passed": true
+          },
+          {
+            "id": "expired-values-withheld",
+            "passed": true
+          },
+          {
+            "id": "future-observation-cutoff-denied",
+            "passed": true
+          }
+        ],
+        "example_training_row": {
+          "label_id": "label-0",
+          "target": 0,
+          "features": {
+            "entity": "entity-0",
+            "feature_time": 100,
+            "observation_cutoff": 100,
+            "source_generation": 7,
+            "spec_name": "transactions",
+            "spec_sha256": "e4a54fdccec19e64e8fa4026873e946c1947c8dbd76b72d90232ae0f02a3d64c",
+            "spec_version": 1,
+            "windows": {
+              "10": {
+                "count": 0,
+                "last": null,
+                "last_event_time": null,
+                "mean": null,
+                "status": "missing",
+                "sum": 0,
+                "valid_before": 121
+              },
+              "30": {
+                "count": null,
+                "last": null,
+                "last_event_time": 78,
+                "mean": null,
+                "status": "stale",
+                "sum": null,
+                "valid_before": 99
+              }
+            }
+          }
+        },
+        "example_expired_serving": {
+          "version_id": "crashed",
+          "served_at": 200,
+          "features": {
+            "entity": "entity-0",
+            "feature_time": 105,
+            "observation_cutoff": 105,
+            "source_generation": 9,
+            "spec_name": "transactions",
+            "spec_sha256": "e4a54fdccec19e64e8fa4026873e946c1947c8dbd76b72d90232ae0f02a3d64c",
+            "spec_version": 1,
+            "windows": {
+              "10": {
+                "count": null,
+                "last": null,
+                "last_event_time": null,
+                "mean": null,
+                "status": "expired",
+                "sum": null,
+                "valid_before": 126
+              },
+              "30": {
+                "count": null,
+                "last": null,
+                "last_event_time": 94,
+                "mean": null,
+                "status": "expired",
+                "sum": null,
+                "valid_before": 108
+              }
+            }
+          },
+          "status": "available"
+        },
+        "limitations": [
+          "Availability timestamps are declared source provenance, not externally attested clocks.",
+          "Local SQLite snapshots and integer-valued signals; no distributed online store or throughput claim.",
+          "Online values retain their materialization feature time; they are not recomputed at serving time."
+        ]
+      }
+    }
+  ]
+}
