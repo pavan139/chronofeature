@@ -53,7 +53,7 @@ New arrivals may require refreshing a still-unexpired snapshot. Publishing a new
 ## Run the temporal examples
 
 ```sh
-python -m pip install -e . --no-build-isolation
+python -m pip install -e .
 python -m chronofeature evaluate --config feature_specs/experiment.json --output artifacts/parity.json
 python -m unittest discover -s test -v
 ```
